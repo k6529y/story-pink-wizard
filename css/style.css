@@ -1,0 +1,221 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ffe0f0 0%, #fff0f5 100%);
+    color: #333;
+    line-height: 1.8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+}
+
+header .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+
+/* Main Content */
+main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    flex: 1;
+}
+
+section {
+    margin-bottom: 3rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #ff1493;
+    border-bottom: 3px solid #ff69b4;
+    padding-bottom: 0.5rem;
+}
+
+/* Hero Intro Section */
+.hero-intro p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+/* Latest Story Section */
+.latest #latest-story {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-left: 4px solid #ff69b4;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+#latest-story strong {
+    color: #ff1493;
+}
+
+/* Episodes Grid */
+#episodes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.episode-card {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    border-left: 4px solid #ff69b4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.episode-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(255, 105, 180, 0.25);
+    background: white;
+}
+
+.episode-card .number {
+    font-weight: bold;
+    color: #ff1493;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.episode-card p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Info Section */
+.info ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.info li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.info li:last-child {
+    border-bottom: none;
+}
+
+.info strong {
+    color: #ff1493;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #666;
+    font-size: 0.85rem;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+    margin-top: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    header .subtitle {
+        font-size: 1rem;
+    }
+
+    main {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+
+    section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    section h2 {
+        font-size: 1.5rem;
+    }
+
+    #episodes-list {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .episode-card {
+        padding: 1rem;
+    }
+
+    .episode-card .number {
+        font-size: 1.1rem;
+    }
+}
+
+/* Dark Mode Support (optional) */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    section {
+        background: #2a2a2a;
+    }
+
+    section h2 {
+        color: #ff69b4;
+    }
+
+    .episode-card,
+    #latest-story {
+        background: #333;
+    }
+
+    .episode-card:hover {
+        background: #3a3a3a;
+    }
+
+    footer {
+        background: #222;
+        border-top-color: #444;
+    }
+}
