@@ -20,10 +20,10 @@ CONTEXT_FILE  = os.path.join(REPO_DIR, "story_context.json")
 STORIES_DIR   = os.path.join(REPO_DIR, "stories")
 IMAGES_DIR    = os.path.join(REPO_DIR, "stories", "images")
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1490683180443893825/gn5BNTR3xUd2JY1RMDhPTmmTzpBgA0EACtIhPBAESerls9wl4mqPN-X8tUE-iVvnkJ0C"
+WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt/{prompt}?width=1024&height=576&model=flux&nologo=true&enhance=true&seed={seed}"
 CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-MODEL = "claude-3-5-sonnet-20241022"
+MODEL = "claude-sonnet-4-6"
 
 
 def call_claude(api_key, prompt, max_tokens=3000):
@@ -188,6 +188,9 @@ def save_json(filepath, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def send_discord(message):
+    if not WEBHOOK_URL:
+        print("[*] Discord webhook not configured (skip)")
+        return False
     try:
         data = json.dumps({"content": message}).encode("utf-8")
         req = urllib.request.Request(
