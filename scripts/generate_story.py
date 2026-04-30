@@ -12,7 +12,6 @@ import urllib.request
 import urllib.parse
 import urllib.error
 from datetime import datetime
-from anthropic import Anthropic
 
 # ========== パス設定（リポジトリルート基準）==========
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +22,30 @@ IMAGES_DIR    = os.path.join(REPO_DIR, "stories", "images")
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1490683180443893825/gn5BNTR3xUd2JY1RMDhPTmmTzpBgA0EACtIhPBAESerls9wl4mqPN-X8tUE-iVvnkJ0C"
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt/{prompt}?width=1024&height=576&model=flux&nologo=true&enhance=true&seed={seed}"
+CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL = "claude-3-5-sonnet-20241022"
+
+
+def call_claude(api_key, prompt, max_tokens=3000):
+    """anthropicパッケージ不要・urllibで直接Anthropic APIを呼ぶ"""
+    body = json.dumps({
+        "model": MODEL,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}]
+    }).encode("utf-8")
+
+    req = urllib.request.Request(CLAUDE_API_URL, data=body, method="POST")
+    req.add_header("x-api-key", api_key)
+    req.add_header("anthropic-version", "2023-06-01")
+    req.add_header("content-type", "application/json")
+
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data["content"][0]["text"].strip()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {e.code}: {body}")
 
 # ========== HTML テンプレート ==========
 HTML_TEMPLATE = """\
@@ -186,7 +208,7 @@ def get_current_arc(config, episode_num):
             return arc
     return None
 
-def generate_story(client, config, context, episode_num):
+def generate_story(api_key, config, context, episode_num):
     arc = get_current_arc(config, episode_num)
     prompt = f"""あなたは「ピンク髪の魔法使い」というファンタジー小説の執筆者です。
 
@@ -219,14 +241,9 @@ def generate_story(client, config, context, episode_num):
 
 本文のみ返してください（説明は不要）。"""
 
-    msg = client.messages.create(
-        model=MODEL,
-        max_tokens=3000,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return msg.content[0].text.strip()
+    return call_claude(api_key, prompt, max_tokens=3000)
 
-def generate_summary(client, story_text, episode_num):
+def generate_summary(api_key, story_text, episode_num):
     prompt = f"""以下の小説第{episode_num}話を3〜4行で簡潔にまとめてください。
 次話執筆時の「前話の内容」として使います。重要な出来事・感情・伏線を含めてください。
 
@@ -235,16 +252,11 @@ def generate_summary(client, story_text, episode_num):
 ---
 
 サマリー:"""
-    msg = client.messages.create(
-        model=MODEL,
-        max_tokens=300,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return msg.content[0].text.strip()
+    return call_claude(api_key, prompt, max_tokens=300)
 
 # ========== 画像生成 ==========
 
-def generate_image_prompt(client, story_text, episode_num):
+def generate_image_prompt(api_key, story_text, episode_num):
     prompt = f"""Based on this Japanese fantasy novel excerpt (Episode {episode_num}), write ONE English image generation prompt for the most visually striking scene.
 
 Requirements:
@@ -258,12 +270,7 @@ Requirements:
 Novel excerpt:
 {story_text[:600]}"""
 
-    msg = client.messages.create(
-        model=MODEL,
-        max_tokens=200,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return msg.content[0].text.strip()
+    return call_claude(api_key, prompt, max_tokens=200)
 
 def download_image(prompt, save_path, episode_num):
     encoded = urllib.parse.quote(prompt)
@@ -384,19 +391,18 @@ def main():
         sys.exit(1)
 
     print(f"[*] Episode {episode_num} / {arc['title']}")
-    client = Anthropic(api_key=api_key, max_retries=3, timeout=120.0)
     today = datetime.now().strftime("%Y-%m-%d")
 
     # 1. ストーリー生成
     print("[*] Generating story...")
-    story_text = generate_story(client, config, context, episode_num)
+    story_text = generate_story(api_key, config, context, episode_num)
     print(f"[OK] {len(story_text)} chars")
 
     # 2. 画像生成
     image_path = os.path.join(IMAGES_DIR, f"{episode_num:03d}.jpg")
     has_image = False
     try:
-        img_prompt = generate_image_prompt(client, story_text, episode_num)
+        img_prompt = generate_image_prompt(api_key, story_text, episode_num)
         has_image = download_image(img_prompt, image_path, episode_num)
     except Exception as e:
         print(f"[WARN] Image skipped: {e}")
@@ -412,7 +418,7 @@ def main():
 
     # 4. サマリー生成・context更新
     print("[*] Generating summary...")
-    summary = generate_summary(client, story_text, episode_num)
+    summary = generate_summary(api_key, story_text, episode_num)
     context["last_episode"] = episode_num
     context["last_episode_summary"] = summary
     save_json(CONTEXT_FILE, context)
