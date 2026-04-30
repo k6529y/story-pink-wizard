@@ -379,7 +379,7 @@ def update_index(episode_num, today_str, has_image):
 # ========== メイン ==========
 
 def main():
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         print("[ERROR] ANTHROPIC_API_KEY not set")
         sys.exit(1)
