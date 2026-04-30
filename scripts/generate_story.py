@@ -1,0 +1,430 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+GitHub Actions で毎日22:00(JST)に実行される自動生成スクリプト。
+ストーリー生成 → 画像生成 → HTML変換 → context更新 を一括実行。
+"""
+import os
+import sys
+import json
+import re
+import urllib.request
+import urllib.parse
+import urllib.error
+from datetime import datetime
+from anthropic import Anthropic
+
+# ========== パス設定（リポジトリルート基準）==========
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_FILE   = os.path.join(REPO_DIR, "story_config.json")
+CONTEXT_FILE  = os.path.join(REPO_DIR, "story_context.json")
+STORIES_DIR   = os.path.join(REPO_DIR, "stories")
+IMAGES_DIR    = os.path.join(REPO_DIR, "stories", "images")
+
+WEBHOOK_URL = "https://discord.com/api/webhooks/1490683180443893825/gn5BNTR3xUd2JY1RMDhPTmmTzpBgA0EACtIhPBAESerls9wl4mqPN-X8tUE-iVvnkJ0C"
+POLLINATIONS_URL = "https://image.pollinations.ai/prompt/{prompt}?width=1024&height=576&model=flux&nologo=true&enhance=true&seed={seed}"
+
+# ========== HTML テンプレート ==========
+HTML_TEMPLATE = """\
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第{episode_num}話 - ピンク髪の魔法使い</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Noto Sans JP', serif;
+            background: linear-gradient(135deg, #ffe0f0, #fff0f5);
+            color: #333;
+            line-height: 1.8;
+        }}
+        header {{
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }}
+        header h1 {{ font-size: 2rem; margin-bottom: 0.5rem; }}
+        .breadcrumb {{
+            text-align: center;
+            padding: 1rem;
+            background: #f9f9f9;
+        }}
+        .breadcrumb a {{ color: #ff1493; text-decoration: none; }}
+        .breadcrumb a:hover {{ text-decoration: underline; }}
+        main {{
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }}
+        .episode-image {{
+            margin-bottom: 0.6rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }}
+        .episode-image img {{
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }}
+        .image-credit {{
+            text-align: center;
+            font-size: 0.75rem;
+            color: #bbb;
+            margin-bottom: 1.8rem;
+        }}
+        .story-content {{
+            line-height: 2;
+            font-size: 1rem;
+            text-align: justify;
+        }}
+        .story-content p {{
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }}
+        .story-content em {{
+            font-style: italic;
+            color: #ff69b4;
+        }}
+        .story-content hr {{
+            margin: 2rem 0;
+            border: none;
+            text-align: center;
+        }}
+        .story-content hr:before {{
+            content: "✦";
+            color: #ff69b4;
+            font-size: 1.2rem;
+        }}
+        .nav-buttons {{
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }}
+        .nav-buttons a {{
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }}
+        .nav-buttons a:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,20,147,0.3);
+        }}
+        footer {{
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ピンク髪の魔法使い</h1>
+        <p>第{episode_num}話</p>
+    </header>
+    <div class="breadcrumb">
+        <a href="../index.html">&larr; トップページに戻る</a>
+    </div>
+    <main>
+{image_block}        <div class="story-content">
+{story_body}
+        </div>
+        <div class="nav-buttons">
+{prev_nav}
+{next_nav}
+        </div>
+    </main>
+    <footer>
+        <p>ピンク髪の魔法使い | 第{episode_num}話</p>
+        <p>毎日22:00に新話更新 | Powered by Claude + GitHub Pages</p>
+    </footer>
+</body>
+</html>
+"""
+
+# ========== ユーティリティ ==========
+
+def load_json(filepath):
+    with open(filepath, encoding="utf-8") as f:
+        return json.load(f)
+
+def save_json(filepath, data):
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def send_discord(message):
+    try:
+        data = json.dumps({"content": message}).encode("utf-8")
+        req = urllib.request.Request(
+            WEBHOOK_URL, data=data,
+            headers={"Content-Type": "application/json"}, method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.status in (200, 204)
+    except Exception as e:
+        print(f"[WARN] Discord: {e}")
+        return False
+
+# ========== ストーリー生成 ==========
+
+def get_current_arc(config, episode_num):
+    for arc in config.get("story_arcs", []):
+        if arc["episodes"][0] <= episode_num <= arc["episodes"][1]:
+            return arc
+    return None
+
+def generate_story(client, config, context, episode_num):
+    arc = get_current_arc(config, episode_num)
+    prompt = f"""あなたは「ピンク髪の魔法使い」というファンタジー小説の執筆者です。
+
+【主人公の設定】
+名前: {config["hero"]["name"]}
+年齢: {config["hero"]["age"]}
+外見: {config["hero"]["appearance"]}
+性格: {config["hero"]["personality"]}
+背景: {config["hero"]["background"]}
+能力: {config["hero"]["magic_abilities"]}
+
+【世界観】
+舞台: {config["world"]["setting"]}
+魔法体系: {config["world"]["magic_system"]}
+
+【現在の章】
+タイトル: {arc["title"]}
+テーマ: {", ".join(arc["themes"])}
+
+【前話までの流れ】
+{context.get("last_episode_summary", "プロローグ")}
+
+【タスク】
+第{episode_num}話を執筆してください。要件：
+- 文字数: 2000字前後
+- 形式: Markdown（本文のみ、見出しなし）
+- スタイル: 引き込まれる執筆。キャラの感情・成長を丁寧に描写
+- 内容: 冒険・魔法・日常のバランス。終わり方は「次話への続き」を意識
+- セリフ: 自然で個性的に
+
+本文のみ返してください（説明は不要）。"""
+
+    msg = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=3000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return msg.content[0].text.strip()
+
+def generate_summary(client, story_text, episode_num):
+    prompt = f"""以下の小説第{episode_num}話を3〜4行で簡潔にまとめてください。
+次話執筆時の「前話の内容」として使います。重要な出来事・感情・伏線を含めてください。
+
+---
+{story_text[:1000]}...
+---
+
+サマリー:"""
+    msg = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=300,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return msg.content[0].text.strip()
+
+# ========== 画像生成 ==========
+
+def generate_image_prompt(client, story_text, episode_num):
+    prompt = f"""Based on this Japanese fantasy novel excerpt (Episode {episode_num}), write ONE English image generation prompt for the most visually striking scene.
+
+Requirements:
+- English only, 50-70 words
+- Include style: "anime fantasy illustration, soft pastel colors, cinematic lighting, high quality, detailed"
+- Main character when present: "teenage girl with long pink hair and emerald green eyes, glowing magical mark on left forearm, traveler's cloak"
+- Focus on atmosphere and emotion
+- No violence or inappropriate content
+- Return prompt text ONLY
+
+Novel excerpt:
+{story_text[:600]}"""
+
+    msg = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=200,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return msg.content[0].text.strip()
+
+def download_image(prompt, save_path, episode_num):
+    encoded = urllib.parse.quote(prompt)
+    url = POLLINATIONS_URL.format(prompt=encoded, seed=episode_num * 42)
+    print(f"[*] Generating image...")
+    print(f"    {prompt[:80]}...")
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            content = resp.read()
+        if len(content) < 1000:
+            print(f"[WARN] Image too small ({len(content)}B)")
+            return False
+        with open(save_path, "wb") as f:
+            f.write(content)
+        print(f"[OK] Image: {len(content):,} bytes")
+        return True
+    except Exception as e:
+        print(f"[WARN] Image failed: {e}")
+        return False
+
+# ========== HTML変換 ==========
+
+def md_to_html_body(md_text):
+    lines = md_text.split('\n')
+    parts = []
+    para = []
+
+    def flush():
+        if para:
+            text = ' '.join(para).strip()
+            if text:
+                parts.append(f'            <p>{text}</p>')
+            para.clear()
+
+    for line in lines:
+        s = line.strip()
+        if s.startswith('#'):
+            flush(); continue
+        if s in ('---', '***', '___'):
+            flush()
+            parts.append('            <hr/>')
+            continue
+        if s == '':
+            flush(); continue
+        s = re.sub(r'\*(.+?)\*', r'<em>\1</em>', s)
+        para.append(s)
+
+    flush()
+    return '\n'.join(parts)
+
+def build_html(story_text, episode_num, total_episodes, has_image):
+    body = md_to_html_body(story_text)
+
+    if has_image:
+        image_block = (
+            f'        <div class="episode-image">\n'
+            f'            <img src="images/{episode_num:03d}.jpg" alt="第{episode_num}話のシーン">\n'
+            f'        </div>\n'
+            f'        <p class="image-credit">Scene illustration · Pollinations.ai / FLUX</p>\n'
+        )
+    else:
+        image_block = ''
+
+    prev_nav = (f'            <a href="{episode_num-1:03d}.html">&larr; 前話へ</a>'
+                if episode_num > 1 else
+                '            <a href="../index.html">&larr; 目次に戻る</a>')
+    next_nav = (f'            <a href="{episode_num+1:03d}.html">次話へ &rarr;</a>'
+                if episode_num < total_episodes else
+                '            <span style="color:#ccc;padding:0.8rem 1.5rem;">（最新話）</span>')
+
+    return HTML_TEMPLATE.format(
+        episode_num=episode_num,
+        image_block=image_block,
+        story_body=body,
+        prev_nav=prev_nav,
+        next_nav=next_nav,
+    )
+
+# ========== index.json更新 ==========
+
+def update_index(episode_num, today_str, has_image):
+    index_file = os.path.join(STORIES_DIR, "index.json")
+    data = {"episodes": [], "total": 0, "last_updated": ""}
+    if os.path.exists(index_file):
+        data = load_json(index_file)
+
+    existing = [e["number"] for e in data.get("episodes", [])]
+    if episode_num not in existing:
+        data["episodes"].append({
+            "number": episode_num,
+            "file": f"{episode_num:03d}.html",
+            "title": f"第{episode_num}話",
+            "published": today_str,
+            "has_image": has_image
+        })
+        data["total"] = len(data["episodes"])
+        data["last_updated"] = today_str
+        save_json(index_file, data)
+    return data["total"]
+
+# ========== メイン ==========
+
+def main():
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("[ERROR] ANTHROPIC_API_KEY not set")
+        sys.exit(1)
+
+    config = load_json(CONFIG_FILE)
+    context = load_json(CONTEXT_FILE)
+    episode_num = context.get("last_episode", 0) + 1
+    arc = get_current_arc(config, episode_num)
+
+    if not arc:
+        print(f"[ERROR] Episode {episode_num} out of range")
+        sys.exit(1)
+
+    print(f"[*] Episode {episode_num} / {arc['title']}")
+    client = Anthropic(api_key=api_key)
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # 1. ストーリー生成
+    print("[*] Generating story...")
+    story_text = generate_story(client, config, context, episode_num)
+    print(f"[OK] {len(story_text)} chars")
+
+    # 2. 画像生成
+    image_path = os.path.join(IMAGES_DIR, f"{episode_num:03d}.jpg")
+    has_image = False
+    try:
+        img_prompt = generate_image_prompt(client, story_text, episode_num)
+        has_image = download_image(img_prompt, image_path, episode_num)
+    except Exception as e:
+        print(f"[WARN] Image skipped: {e}")
+
+    # 3. HTML変換・保存
+    os.makedirs(STORIES_DIR, exist_ok=True)
+    total = update_index(episode_num, today, has_image)
+    html = build_html(story_text, episode_num, total, has_image)
+    html_path = os.path.join(STORIES_DIR, f"{episode_num:03d}.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"[OK] HTML saved: {html_path}")
+
+    # 4. サマリー生成・context更新
+    print("[*] Generating summary...")
+    summary = generate_summary(client, story_text, episode_num)
+    context["last_episode"] = episode_num
+    context["last_episode_summary"] = summary
+    save_json(CONTEXT_FILE, context)
+    print("[OK] context updated")
+
+    # 5. Discord通知
+    send_discord(
+        f"[NEW] 第{episode_num}話 公開！\n"
+        f"{arc['title']}\n"
+        f"https://k6529y.github.io/story-pink-wizard/stories/{episode_num:03d}.html"
+    )
+
+    print(f"[OK] Episode {episode_num} done")
+
+if __name__ == "__main__":
+    main()
