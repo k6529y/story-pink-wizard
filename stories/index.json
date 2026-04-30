@@ -5,8 +5,15 @@
       "file": "001.html",
       "title": "第1話",
       "published": "2026-04-29"
+    },
+    {
+      "number": 2,
+      "file": "002.html",
+      "title": "第2話",
+      "published": "2026-05-01",
+      "has_image": true
     }
   ],
-  "total": 1,
-  "last_updated": "2026-04-29"
+  "total": 2,
+  "last_updated": "2026-05-01"
 }
