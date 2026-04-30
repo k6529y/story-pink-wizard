@@ -23,6 +23,7 @@ IMAGES_DIR    = os.path.join(REPO_DIR, "stories", "images")
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1490683180443893825/gn5BNTR3xUd2JY1RMDhPTmmTzpBgA0EACtIhPBAESerls9wl4mqPN-X8tUE-iVvnkJ0C"
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt/{prompt}?width=1024&height=576&model=flux&nologo=true&enhance=true&seed={seed}"
+MODEL = "claude-3-5-sonnet-20241022"
 
 # ========== HTML テンプレート ==========
 HTML_TEMPLATE = """\
@@ -219,7 +220,7 @@ def generate_story(client, config, context, episode_num):
 本文のみ返してください（説明は不要）。"""
 
     msg = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=MODEL,
         max_tokens=3000,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -235,7 +236,7 @@ def generate_summary(client, story_text, episode_num):
 
 サマリー:"""
     msg = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=MODEL,
         max_tokens=300,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -258,7 +259,7 @@ Novel excerpt:
 {story_text[:600]}"""
 
     msg = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=MODEL,
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -383,7 +384,7 @@ def main():
         sys.exit(1)
 
     print(f"[*] Episode {episode_num} / {arc['title']}")
-    client = Anthropic(api_key=api_key)
+    client = Anthropic(api_key=api_key, max_retries=3, timeout=120.0)
     today = datetime.now().strftime("%Y-%m-%d")
 
     # 1. ストーリー生成
