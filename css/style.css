@@ -1,221 +1,373 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ==========================================
+   ピンク髪の魔法使い - メインスタイル
+   テーマ: ダーク幻想・文学的
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+:root {
+    --bg-base:     #0d0815;
+    --bg-surface:  #1a1228;
+    --bg-elevated: #241834;
+    --border:      #2d2040;
+    --text-main:   #f4ebf6;
+    --text-sub:    #a89cb0;
+    --text-muted:  #7a6f88;
+    --accent:      #ff7eb6;
+    --accent-deep: #d65c95;
+    --gold:        #e6c989;
+    --glow-pink:   rgba(255, 126, 182, 0.4);
+    --glow-soft:   rgba(255, 126, 182, 0.15);
+    --serif:       'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
+    --sans:        'Noto Sans JP', system-ui, sans-serif;
 }
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
 body {
-    font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ffe0f0 0%, #fff0f5 100%);
-    color: #333;
+    font-family: var(--sans);
+    background: var(--bg-base);
+    background-image:
+        radial-gradient(ellipse at top right, rgba(214, 92, 149, 0.15), transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(120, 80, 180, 0.12), transparent 50%);
+    background-attachment: fixed;
+    color: var(--text-main);
     line-height: 1.8;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header */
-header {
+/* =========== ヘッダー =========== */
+.site-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(13, 8, 21, 0.7);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.site-header .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.site-header h1 {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-main);
+}
+
+.site-header h1 .accent {
+    color: var(--accent);
+}
+
+.site-header .meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+/* =========== ヒーロー =========== */
+.hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 4rem 2rem;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(2px) brightness(0.4);
+    transform: scale(1.1);
+    z-index: 0;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(13, 8, 21, 0.5) 0%,
+        rgba(13, 8, 21, 0.7) 60%,
+        var(--bg-base) 100%
+    );
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
     text-align: center;
-    padding: 3rem 1rem;
-    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 720px;
 }
 
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: 2px;
-}
-
-header .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.95;
-    font-weight: 300;
-}
-
-/* Main Content */
-main {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    flex: 1;
-}
-
-section {
-    margin-bottom: 3rem;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-section h2 {
-    font-size: 1.8rem;
+.hero-tag {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
     margin-bottom: 1.5rem;
-    color: #ff1493;
-    border-bottom: 3px solid #ff69b4;
-    padding-bottom: 0.5rem;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 126, 182, 0.05);
 }
 
-/* Hero Intro Section */
-.hero-intro p {
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    line-height: 1.8;
+.hero h2 {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.04em;
 }
 
-/* Latest Story Section */
-.latest #latest-story {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    border-left: 4px solid #ff69b4;
+.hero h2 .em {
+    color: var(--accent);
+    font-style: italic;
+}
+
+.hero p {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 2;
+    color: var(--text-sub);
+    margin-bottom: 2.5rem;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.1em;
     border-radius: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px var(--glow-pink);
     font-size: 0.95rem;
-    line-height: 1.8;
 }
 
-#latest-story strong {
-    color: #ff1493;
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px var(--glow-pink);
 }
 
-/* Episodes Grid */
-#episodes-list {
+/* =========== セクション共通 =========== */
+main { flex: 1; }
+
+section.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+}
+
+.section-title {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    letter-spacing: 0.05em;
+}
+
+.section-title .num {
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-right: 0.8rem;
+    letter-spacing: 0.2em;
+}
+
+.section-sub {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 3rem;
+    text-transform: uppercase;
+}
+
+/* =========== エピソード一覧 =========== */
+.episodes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
 }
 
 .episode-card {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    border-radius: 6px;
+    display: block;
     text-decoration: none;
-    color: #333;
-    transition: all 0.3s ease;
-    border-left: 4px solid #ff69b4;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    color: inherit;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    position: relative;
 }
 
 .episode-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(255, 105, 180, 0.25);
-    background: white;
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 40px var(--glow-soft);
 }
 
-.episode-card .number {
-    font-weight: bold;
-    color: #ff1493;
-    font-size: 1.3rem;
+.episode-card .thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: var(--bg-elevated);
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.episode-card .thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(13, 8, 21, 0.7) 100%);
+}
+
+.episode-card .thumb-fallback {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+}
+
+.episode-card .body {
+    padding: 1.2rem 1.4rem;
+}
+
+.episode-card .num {
+    font-family: var(--serif);
+    color: var(--accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.4rem;
+}
+
+.episode-card .title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
+}
+
+.episode-card .date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
+
+/* =========== 制作情報 =========== */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.2rem;
+}
+
+.info-card {
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.info-card .label {
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     margin-bottom: 0.5rem;
 }
 
-.episode-card p {
-    font-size: 0.9rem;
-    color: #666;
+.info-card .value {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    color: var(--text-main);
 }
 
-/* Info Section */
-.info ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-.info li {
-    padding: 0.8rem 0;
-    border-bottom: 1px solid #eee;
-    font-size: 0.95rem;
-}
-
-.info li:last-child {
-    border-bottom: none;
-}
-
-.info strong {
-    color: #ff1493;
-}
-
-/* Footer */
-footer {
+/* =========== フッター =========== */
+.site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
     text-align: center;
-    padding: 2rem 1rem;
-    color: #666;
-    font-size: 0.85rem;
-    border-top: 1px solid #e0e0e0;
-    background: #f9f9f9;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
     margin-top: auto;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2rem;
-    }
+.site-footer p { margin-bottom: 0.4rem; }
 
-    header .subtitle {
-        font-size: 1rem;
-    }
+.site-footer a {
+    color: var(--text-sub);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.site-footer a:hover { color: var(--accent); }
 
-    main {
-        margin: 1rem auto;
-        padding: 0 0.5rem;
-    }
-
-    section {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    section h2 {
-        font-size: 1.5rem;
-    }
-
-    #episodes-list {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 0.8rem;
-    }
-
-    .episode-card {
-        padding: 1rem;
-    }
-
-    .episode-card .number {
-        font-size: 1.1rem;
-    }
+/* =========== スピナー (loading) =========== */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
 }
 
-/* Dark Mode Support (optional) */
-@media (prefers-color-scheme: dark) {
-    body {
-        background: #1a1a1a;
-        color: #e0e0e0;
-    }
+/* =========== レスポンシブ =========== */
+@media (max-width: 768px) {
+    .site-header { padding: 1rem 1.2rem; }
+    .site-header h1 { font-size: 1.1rem; }
+    .site-header .meta { display: none; }
+    .hero { min-height: 60vh; padding: 3rem 1.2rem; }
+    section.container { padding: 3.5rem 1.2rem; }
+    .episodes-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+    .episode-card .body { padding: 1rem; }
+    .episode-card .title { font-size: 1rem; }
+    .info-grid { grid-template-columns: 1fr; }
+}
 
-    section {
-        background: #2a2a2a;
-    }
+/* =========== 入場アニメーション =========== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
-    section h2 {
-        color: #ff69b4;
-    }
-
-    .episode-card,
-    #latest-story {
-        background: #333;
-    }
-
-    .episode-card:hover {
-        background: #3a3a3a;
-    }
-
-    footer {
-        background: #222;
-        border-top-color: #444;
-    }
+.fade-in {
+    animation: fadeUp 0.8s ease-out forwards;
+    opacity: 0;
 }

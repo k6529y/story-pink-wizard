@@ -54,125 +54,39 @@ HTML_TEMPLATE = """\
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第{episode_num}話 - ピンク髪の魔法使い</title>
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{
-            font-family: 'Noto Sans JP', serif;
-            background: linear-gradient(135deg, #ffe0f0, #fff0f5);
-            color: #333;
-            line-height: 1.8;
-        }}
-        header {{
-            background: linear-gradient(135deg, #ff69b4, #ff1493);
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-        }}
-        header h1 {{ font-size: 2rem; margin-bottom: 0.5rem; }}
-        .breadcrumb {{
-            text-align: center;
-            padding: 1rem;
-            background: #f9f9f9;
-        }}
-        .breadcrumb a {{ color: #ff1493; text-decoration: none; }}
-        .breadcrumb a:hover {{ text-decoration: underline; }}
-        main {{
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }}
-        .episode-image {{
-            margin-bottom: 0.6rem;
-            border-radius: 8px;
-            overflow: hidden;
-        }}
-        .episode-image img {{
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 8px;
-        }}
-        .image-credit {{
-            text-align: center;
-            font-size: 0.75rem;
-            color: #bbb;
-            margin-bottom: 1.8rem;
-        }}
-        .story-content {{
-            line-height: 2;
-            font-size: 1rem;
-            text-align: justify;
-        }}
-        .story-content p {{
-            margin-bottom: 1.5rem;
-            text-indent: 2em;
-        }}
-        .story-content em {{
-            font-style: italic;
-            color: #ff69b4;
-        }}
-        .story-content hr {{
-            margin: 2rem 0;
-            border: none;
-            text-align: center;
-        }}
-        .story-content hr:before {{
-            content: "✦";
-            color: #ff69b4;
-            font-size: 1.2rem;
-        }}
-        .nav-buttons {{
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #eee;
-        }}
-        .nav-buttons a {{
-            padding: 0.8rem 1.5rem;
-            background: linear-gradient(135deg, #ff69b4, #ff1493);
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }}
-        .nav-buttons a:hover {{
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255,20,147,0.3);
-        }}
-        footer {{
-            text-align: center;
-            padding: 2rem 1rem;
-            color: #666;
-            font-size: 0.9rem;
-        }}
-    </style>
+    <title>第{episode_num}話 | ピンク髪の魔法使い</title>
+    <link rel="stylesheet" href="../css/story.css">
 </head>
 <body>
-    <header>
-        <h1>ピンク髪の魔法使い</h1>
-        <p>第{episode_num}話</p>
-    </header>
-    <div class="breadcrumb">
-        <a href="../index.html">&larr; トップページに戻る</a>
+
+<header class="site-header">
+    <div class="brand">
+        <a href="../index.html" class="title">ピンク髪の<span class="accent">魔法使い</span></a>
+        <span class="ep-num">EP. {episode_num:03d}</span>
     </div>
-    <main>
-{image_block}        <div class="story-content">
+</header>
+
+{image_block}
+<article class="episode-body fade-in">
+    <div class="episode-meta">
+        <div class="ep-label">EPISODE {episode_num:03d}</div>
+        <h1>第{episode_num}話</h1>
+    </div>
+    <div class="story-content">
 {story_body}
-        </div>
-        <div class="nav-buttons">
+    </div>
+</article>
+
+<nav class="episode-nav">
 {prev_nav}
 {next_nav}
-        </div>
-    </main>
-    <footer>
-        <p>ピンク髪の魔法使い | 第{episode_num}話</p>
-        <p>毎日22:00に新話更新 | Powered by Claude + GitHub Pages</p>
-    </footer>
+</nav>
+
+<footer class="site-footer">
+    <p>ピンク髪の魔法使い · Pink-Haired Wizard</p>
+    <p>Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
+</footer>
+
 </body>
 </html>
 """
@@ -307,7 +221,7 @@ def md_to_html_body(md_text):
         if para:
             text = ' '.join(para).strip()
             if text:
-                parts.append(f'            <p>{text}</p>')
+                parts.append(f'        <p>{text}</p>')
             para.clear()
 
     for line in lines:
@@ -316,7 +230,7 @@ def md_to_html_body(md_text):
             flush(); continue
         if s in ('---', '***', '___'):
             flush()
-            parts.append('            <hr/>')
+            parts.append('        <hr/>')
             continue
         if s == '':
             flush(); continue
@@ -331,20 +245,22 @@ def build_html(story_text, episode_num, total_episodes, has_image):
 
     if has_image:
         image_block = (
-            f'        <div class="episode-image">\n'
-            f'            <img src="images/{episode_num:03d}.jpg" alt="第{episode_num}話のシーン">\n'
-            f'        </div>\n'
-            f'        <p class="image-credit">Scene illustration · Pollinations.ai / FLUX</p>\n'
+            f'<section class="episode-hero fade-in">\n'
+            f'    <div class="frame">\n'
+            f'        <img src="images/{episode_num:03d}.jpg" alt="第{episode_num}話のシーン">\n'
+            f'    </div>\n'
+            f'    <p class="image-credit">SCENE ILLUSTRATION · POLLINATIONS.AI / FLUX</p>\n'
+            f'</section>\n'
         )
     else:
         image_block = ''
 
-    prev_nav = (f'            <a href="{episode_num-1:03d}.html">&larr; 前話へ</a>'
+    prev_nav = (f'    <a href="{episode_num-1:03d}.html" class="prev">&larr; 第{episode_num-1}話</a>'
                 if episode_num > 1 else
-                '            <a href="../index.html">&larr; 目次に戻る</a>')
-    next_nav = (f'            <a href="{episode_num+1:03d}.html">次話へ &rarr;</a>'
+                '    <a href="../index.html" class="prev">&larr; 目次に戻る</a>')
+    next_nav = (f'    <a href="{episode_num+1:03d}.html" class="next">第{episode_num+1}話 &rarr;</a>'
                 if episode_num < total_episodes else
-                '            <span style="color:#ccc;padding:0.8rem 1.5rem;">（最新話）</span>')
+                '    <span class="disabled">最新話</span>')
 
     return HTML_TEMPLATE.format(
         episode_num=episode_num,

@@ -3,51 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ピンク髪の魔法使い | 全100話連載中</title>
+    <title>ピンク髪の魔法使い | 全100話連載</title>
+    <meta name="description" content="ピンク髪の魔法使いロゼリアが秘められた力を目覚めさせるファンタジー小説。毎日22時更新、全100話連載中。">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
-        <h1>✨ ピンク髪の魔法使い ✨</h1>
-        <p class="subtitle">毎日夜22時に新話公開</p>
-    </header>
 
-    <main>
-        <section class="hero-intro">
-            <h2>物語について</h2>
-            <p>ピンク髪の魔法使い <strong>ロゼリア</strong> が、秘められた力を目覚めさせながら、魔法の世界で冒険を繰り広げる。</p>
-            <p>参考: 『無職転生』『魔術師クノン』『魔女と傭兵』『崩壊世界の魔法杖職人』のような、キャラクター成長と世界観の重厚さを兼ね備えたファンタジー。</p>
-        </section>
+<header class="site-header">
+    <div class="brand">
+        <h1>ピンク髪の<span class="accent">魔法使い</span></h1>
+        <span class="meta">毎日 22:00 更新 / 全100話</span>
+    </div>
+</header>
 
-        <section class="latest">
-            <h2>最新話</h2>
-            <div id="latest-story">
-                <p>読み込み中...</p>
+<main>
+    <!-- ======= ヒーローセクション ======= -->
+    <section class="hero" id="hero">
+        <div class="hero-bg" id="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content fade-in">
+            <span class="hero-tag">Fantasy Novel · 100 Episodes</span>
+            <h2>ピンク髪の少女は、<br>夜明け前に<span class="em">村を発つ</span>。</h2>
+            <p>
+                腕に刻まれた制御不能な刻印。<br>
+                叔母の諦念と慈愛が溶け合った横顔。<br>
+                ロゼリアは旅立つ——魔法学園アルカナムへ。
+            </p>
+            <a href="#latest" class="btn-primary" id="hero-cta">最新話を読む</a>
+        </div>
+    </section>
+
+    <!-- ======= 最新話 ======= -->
+    <section class="container" id="latest">
+        <div class="section-sub">— Latest Episode</div>
+        <h2 class="section-title">最新話</h2>
+        <div id="latest-story">
+            <div class="loading">読み込み中...</div>
+        </div>
+    </section>
+
+    <!-- ======= エピソード一覧 ======= -->
+    <section class="container" id="episodes">
+        <div class="section-sub">— All Episodes</div>
+        <h2 class="section-title">全話一覧</h2>
+        <div id="episodes-list" class="episodes-grid">
+            <div class="loading">読み込み中...</div>
+        </div>
+    </section>
+
+    <!-- ======= 制作情報 ======= -->
+    <section class="container" id="about">
+        <div class="section-sub">— About this Project</div>
+        <h2 class="section-title">物語について</h2>
+        <p style="font-family: var(--serif); color: var(--text-sub); line-height: 2.2; margin-bottom: 2.5rem; max-width: 720px;">
+            『無職転生』『魔術師クノン』『魔女と傭兵』『崩壊世界の魔法杖職人』のような、
+            キャラクターの成長と世界観の重厚さを兼ね備えた異世界ファンタジー。
+            ピンク髪の魔法使いロゼリアが秘められた力に目覚めながら、広大な魔法世界で冒険を繰り広げる。
+        </p>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="label">執筆</div>
+                <div class="value">Claude (Anthropic)</div>
             </div>
-        </section>
-
-        <section class="episodes">
-            <h2>全話一覧</h2>
-            <div id="episodes-list">
-                <p>読み込み中...</p>
+            <div class="info-card">
+                <div class="label">挿絵</div>
+                <div class="value">Pollinations.ai / FLUX</div>
             </div>
-        </section>
+            <div class="info-card">
+                <div class="label">話数</div>
+                <div class="value">全100話</div>
+            </div>
+            <div class="info-card">
+                <div class="label">更新</div>
+                <div class="value">毎日 22:00</div>
+            </div>
+        </div>
+    </section>
+</main>
 
-        <section class="info">
-            <h2>制作情報</h2>
-            <ul>
-                <li><strong>自動生成:</strong> Claude (Anthropic) による毎日自動執筆</li>
-                <li><strong>総話数:</strong> 全100話（約4ヶ月間の連載予定）</li>
-                <li><strong>更新時刻:</strong> 毎日夜22:00</li>
-                <li><strong>フォーマット:</strong> Markdown → HTML 自動変換</li>
-            </ul>
-        </section>
-    </main>
+<footer class="site-footer">
+    <p>Pink-Haired Wizard / 2026</p>
+    <p>Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
+</footer>
 
-    <footer>
-        <p>&copy; 2026 Pink-Haired Wizard Story | Powered by Claude + GitHub Pages</p>
-    </footer>
-
-    <script src="scripts/nav.js"></script>
+<script src="scripts/nav.js"></script>
 </body>
 </html>

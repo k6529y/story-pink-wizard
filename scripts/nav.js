@@ -1,88 +1,83 @@
 /**
- * ピンク髪の魔法使い - ナビゲーション & 動的コンテンツ読み込み
- * stories/index.json からエピソード一覧を取得する方式
+ * ピンク髪の魔法使い - インデックスページ動的読み込み
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadEpisodeData();
-});
-
-function loadEpisodeData() {
-    // index.json からエピソード一覧を取得
+document.addEventListener('DOMContentLoaded', () => {
     fetch('stories/index.json')
-        .then(response => {
-            if (!response.ok) throw new Error('index.json not found');
-            return response.json();
-        })
+        .then(r => r.ok ? r.json() : Promise.reject('no index'))
         .then(data => {
             const episodes = data.episodes || [];
-            if (episodes.length === 0) {
-                showNoContent();
-                return;
-            }
-            // 降順にソート（最新話が先頭）
-            const sorted = [...episodes].sort((a, b) => b.number - a.number);
-            renderLatestStory(sorted[0]);
-            renderEpisodesList([...episodes].sort((a, b) => a.number - b.number));
+            if (!episodes.length) return showEmpty();
+            const sortedDesc = [...episodes].sort((a, b) => b.number - a.number);
+            const sortedAsc  = [...episodes].sort((a, b) => a.number - b.number);
+            renderHeroBg(sortedDesc[0]);
+            renderLatest(sortedDesc[0]);
+            renderEpisodeList(sortedAsc);
         })
         .catch(err => {
-            console.warn('Failed to load index.json:', err);
-            showNoContent();
+            console.warn(err);
+            showEmpty();
         });
+});
+
+function thumbPath(ep) {
+    return ep.has_image ? `stories/images/${String(ep.number).padStart(3, '0')}.jpg` : null;
 }
 
-function renderLatestStory(episode) {
-    const latestStoryDiv = document.getElementById('latest-story');
-    if (!latestStoryDiv) return;
+function renderHeroBg(latest) {
+    const heroBg = document.getElementById('hero-bg');
+    const heroCta = document.getElementById('hero-cta');
+    const t = thumbPath(latest);
+    if (heroBg && t) heroBg.style.backgroundImage = `url('${t}')`;
+    if (heroCta) heroCta.href = `stories/${latest.file}`;
+}
 
-    latestStoryDiv.innerHTML = `
-        <div style="text-align: center; padding: 1rem 0 1.5rem;">
-            <p style="color: #ff1493; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.4rem;">
-                最新エピソード: 第${episode.number}話
-            </p>
-            <p style="color: #888; font-size: 0.9rem; margin-bottom: 1.5rem;">
-                ${episode.published} 公開
-            </p>
-            <a href="stories/${episode.file}" style="
-                display: inline-block;
-                padding: 0.9rem 2.5rem;
-                background: linear-gradient(135deg, #ff69b4, #ff1493);
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 1.05rem;
-                transition: all 0.3s;
-                box-shadow: 0 2px 8px rgba(255, 20, 147, 0.25);
-            "
-            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(255, 20, 147, 0.4)';"
-            onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 8px rgba(255, 20, 147, 0.25)';">
-                第${episode.number}話を読む
-            </a>
-        </div>
+function renderLatest(ep) {
+    const el = document.getElementById('latest-story');
+    if (!el) return;
+    const thumb = thumbPath(ep);
+    el.innerHTML = `
+        <a href="stories/${ep.file}" class="episode-card fade-in" style="max-width: 640px;">
+            ${thumb
+                ? `<div class="thumb" style="background-image:url('${thumb}'); aspect-ratio: 21/9;"></div>`
+                : `<div class="thumb-fallback" style="aspect-ratio: 21/9;">第${ep.number}話</div>`}
+            <div class="body" style="padding: 1.6rem 1.8rem;">
+                <div class="num">EP. ${String(ep.number).padStart(3, '0')}</div>
+                <div class="title" style="font-size: 1.4rem;">${ep.title}</div>
+                <div class="date">${ep.published} 公開</div>
+            </div>
+        </a>
     `;
 }
 
-function renderEpisodesList(episodes) {
-    const episodesListDiv = document.getElementById('episodes-list');
-    if (!episodesListDiv) return;
-
-    episodesListDiv.innerHTML = '';
-    episodes.forEach(episode => {
+function renderEpisodeList(eps) {
+    const el = document.getElementById('episodes-list');
+    if (!el) return;
+    el.innerHTML = '';
+    eps.forEach((ep, i) => {
+        const t = thumbPath(ep);
         const card = document.createElement('a');
-        card.href = `stories/${episode.file}`;
+        card.href = `stories/${ep.file}`;
         card.className = 'episode-card';
+        card.style.animationDelay = `${i * 60}ms`;
+        card.classList.add('fade-in');
         card.innerHTML = `
-            <div class="number">第${episode.number}話</div>
-            <p style="font-size: 0.85rem; color: #999; margin-top: 0.3rem;">${episode.published}</p>
+            ${t
+                ? `<div class="thumb" style="background-image:url('${t}');"></div>`
+                : `<div class="thumb-fallback">第${ep.number}話</div>`}
+            <div class="body">
+                <div class="num">EP. ${String(ep.number).padStart(3, '0')}</div>
+                <div class="title">${ep.title}</div>
+                <div class="date">${ep.published}</div>
+            </div>
         `;
-        episodesListDiv.appendChild(card);
+        el.appendChild(card);
     });
 }
 
-function showNoContent() {
-    const latestStoryDiv = document.getElementById('latest-story');
-    const episodesListDiv = document.getElementById('episodes-list');
-    if (latestStoryDiv) latestStoryDiv.innerHTML = '<p style="color:#999; text-align:center; padding:1rem;">最新話を準備中...</p>';
-    if (episodesListDiv) episodesListDiv.innerHTML = '<p style="color:#999; text-align:center; padding:1rem;">ストーリーを準備中...</p>';
+function showEmpty() {
+    const latest = document.getElementById('latest-story');
+    const list   = document.getElementById('episodes-list');
+    if (latest) latest.innerHTML = '<div class="loading">準備中...</div>';
+    if (list)   list.innerHTML   = '<div class="loading">準備中...</div>';
 }

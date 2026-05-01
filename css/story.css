@@ -1,0 +1,279 @@
+/* ==========================================
+   ピンク髪の魔法使い - 個別話ページ
+   テーマ: 読書体験重視・文学的
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500&display=swap');
+
+:root {
+    --bg-base:     #0d0815;
+    --bg-surface:  #1a1228;
+    --bg-paper:    #f4ebde;
+    --paper-text:  #2a1c25;
+    --paper-sub:   #6b5d65;
+    --paper-rule:  #d8c8b0;
+    --border:      #2d2040;
+    --accent:      #ff7eb6;
+    --accent-deep: #d65c95;
+    --gold:        #b8945a;
+    --serif:       'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
+    --sans:        'Noto Sans JP', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--sans);
+    background: var(--bg-base);
+    background-image:
+        radial-gradient(ellipse at top right, rgba(214, 92, 149, 0.12), transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(120, 80, 180, 0.10), transparent 50%);
+    background-attachment: fixed;
+    color: #e8dde8;
+    line-height: 1.8;
+    min-height: 100vh;
+}
+
+/* =========== ヘッダー =========== */
+.site-header {
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(13, 8, 21, 0.7);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.site-header .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.site-header a.title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f4ebf6;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+}
+.site-header a.title:hover { color: var(--accent); }
+
+.site-header a.title .accent { color: var(--accent); }
+
+.site-header .ep-num {
+    font-family: var(--serif);
+    color: #a89cb0;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+}
+
+/* =========== ヒーロー画像 =========== */
+.episode-hero {
+    max-width: 1100px;
+    margin: 2.5rem auto 0;
+    padding: 0 2rem;
+}
+
+.episode-hero .frame {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-surface);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.episode-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.image-credit {
+    text-align: right;
+    font-size: 0.7rem;
+    color: #7a6f88;
+    margin-top: 0.5rem;
+    letter-spacing: 0.15em;
+}
+
+/* =========== 本文 =========== */
+.episode-body {
+    max-width: 720px;
+    margin: 3rem auto;
+    padding: 4rem 3rem;
+    background: var(--bg-paper);
+    color: var(--paper-text);
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.episode-body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 8px 8px 0 0;
+}
+
+.episode-meta {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--paper-rule);
+}
+
+.episode-meta .ep-label {
+    font-family: var(--serif);
+    color: var(--accent-deep);
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 0.6rem;
+}
+
+.episode-meta h1 {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--paper-text);
+    letter-spacing: 0.05em;
+}
+
+.episode-meta .date {
+    color: var(--paper-sub);
+    font-size: 0.8rem;
+    margin-top: 0.6rem;
+    letter-spacing: 0.1em;
+}
+
+.story-content {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 2.2;
+    color: var(--paper-text);
+}
+
+.story-content p {
+    margin-bottom: 1.5rem;
+    text-indent: 1em;
+}
+
+.story-content p:first-of-type::first-letter {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--accent-deep);
+    line-height: 1;
+    float: left;
+    margin: 0.05em 0.1em 0 0;
+    font-family: var(--serif);
+}
+
+.story-content em {
+    font-style: italic;
+    color: var(--accent-deep);
+    font-weight: 500;
+}
+
+.story-content hr {
+    border: none;
+    text-align: center;
+    margin: 3rem 0;
+    height: 20px;
+}
+
+.story-content hr::before {
+    content: "✦   ✦   ✦";
+    color: var(--gold);
+    letter-spacing: 1em;
+    font-size: 0.9rem;
+}
+
+/* =========== ナビゲーション =========== */
+.episode-nav {
+    max-width: 720px;
+    margin: 0 auto 4rem;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.episode-nav a, .episode-nav span {
+    padding: 1rem 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: #e8dde8;
+    text-decoration: none;
+    font-family: var(--serif);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.episode-nav a:hover {
+    border-color: var(--accent);
+    background: rgba(255, 126, 182, 0.08);
+    color: var(--accent);
+}
+
+.episode-nav .prev { text-align: left; }
+.episode-nav .next { text-align: right; }
+.episode-nav .disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-align: right;
+}
+
+/* =========== フッター =========== */
+.site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    color: #7a6f88;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+}
+
+.site-footer a {
+    color: #a89cb0;
+    text-decoration: none;
+}
+
+.site-footer a:hover { color: var(--accent); }
+
+/* =========== レスポンシブ =========== */
+@media (max-width: 768px) {
+    .site-header { padding: 1rem 1.2rem; }
+    .site-header a.title { font-size: 0.95rem; }
+    .episode-hero { padding: 0 1rem; margin-top: 1.5rem; }
+    .episode-body {
+        padding: 2.5rem 1.5rem;
+        margin: 2rem 1rem;
+    }
+    .episode-meta h1 { font-size: 1.5rem; }
+    .story-content { font-size: 1rem; line-height: 2.1; }
+    .episode-nav {
+        margin: 0 1rem 3rem;
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========== 入場アニメ =========== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeUp 0.8s ease-out forwards;
+}
