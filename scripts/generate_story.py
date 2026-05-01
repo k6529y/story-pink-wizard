@@ -154,8 +154,31 @@ def get_current_arc(config, episode_num):
             return arc
     return None
 
+def format_characters(context):
+    chars = context.get("key_characters", [])
+    if not chars:
+        return "（まだ登場人物は記録されていません）"
+    lines = []
+    for c in chars:
+        line = f"- {c['name']}（{c.get('role', '')}）"
+        if c.get('description'):
+            line += f"：{c['description']}"
+        lines.append(line)
+    return "\n".join(lines)
+
+def format_locations(context):
+    locs = context.get("key_locations", [])
+    if not locs:
+        return ""
+    return "\n".join([f"- {l['name']}：{l.get('description', '')}" for l in locs])
+
+
 def generate_story(api_key, config, context, episode_num):
     arc = get_current_arc(config, episode_num)
+    chars_block = format_characters(context)
+    locs_block = format_locations(context)
+    locs_section = f"\n【既出の地名・組織（必ずこの名称を使用）】\n{locs_block}\n" if locs_block else ""
+
     prompt = f"""あなたは「ピンク髪の魔法使い」というファンタジー小説の執筆者です。
 
 【主人公の設定】
@@ -170,6 +193,9 @@ def generate_story(api_key, config, context, episode_num):
 舞台: {config["world"]["setting"]}
 魔法体系: {config["world"]["magic_system"]}
 
+【既出の登場人物（必ずこの名前を使用すること。新キャラを出す場合のみ新しい名前を導入）】
+{chars_block}
+{locs_section}
 【現在の章】
 タイトル: {arc["title"]}
 テーマ: {", ".join(arc["themes"])}
@@ -184,6 +210,7 @@ def generate_story(api_key, config, context, episode_num):
 - スタイル: 引き込まれる執筆。キャラの感情・成長を丁寧に描写
 - 内容: 冒険・魔法・日常のバランス。終わり方は「次話への続き」を意識
 - セリフ: 自然で個性的に
+- 重要: 既出キャラの名前・設定は厳守。新キャラを出した場合は名前と特徴を明記
 
 本文のみ返してください（説明は不要）。"""
 
@@ -191,14 +218,74 @@ def generate_story(api_key, config, context, episode_num):
 
 def generate_summary(api_key, story_text, episode_num):
     prompt = f"""以下の小説第{episode_num}話を3〜4行で簡潔にまとめてください。
-次話執筆時の「前話の内容」として使います。重要な出来事・感情・伏線を含めてください。
+次話執筆時の「前話の内容」として使います。
+重要：登場人物名は必ず本文の通り正確に書くこと。
+重要な出来事・感情・伏線を含めてください。
 
 ---
-{story_text[:1000]}...
+{story_text}
 ---
 
-サマリー:"""
-    return call_claude(api_key, prompt, max_tokens=300)
+サマリー（人名は正確に）:"""
+    return call_claude(api_key, prompt, max_tokens=400)
+
+
+def extract_new_characters(api_key, story_text, episode_num, existing_names):
+    existing_str = "、".join(existing_names) if existing_names else "（なし）"
+    prompt = f"""以下のファンタジー小説第{episode_num}話から、登場した人物名を抽出してください。
+
+【既出の人物（除外）】
+{existing_str}
+
+新規登場人物のみJSON配列で返してください（JSONのみ）:
+[
+  {{"name": "名前", "role": "役割", "description": "簡潔な特徴"}}
+]
+
+新規がなければ [] を返す。地名・国名は除く。
+
+本文:
+---
+{story_text}
+---
+"""
+    try:
+        text = call_claude(api_key, prompt, max_tokens=500)
+        match = re.search(r'\[.*\]', text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+    except Exception as e:
+        print(f"[WARN] character extraction failed: {e}")
+    return []
+
+
+def extract_new_locations(api_key, story_text, episode_num, existing_names):
+    existing_str = "、".join(existing_names) if existing_names else "（なし）"
+    prompt = f"""以下のファンタジー小説第{episode_num}話から、新登場の地名・国名・組織名・建物名を抽出してください。
+
+【既出（除外）】
+{existing_str}
+
+新規のみJSON配列で（JSONのみ）:
+[
+  {{"name": "名称", "description": "特徴"}}
+]
+
+新規がなければ []。
+
+本文:
+---
+{story_text}
+---
+"""
+    try:
+        text = call_claude(api_key, prompt, max_tokens=400)
+        match = re.search(r'\[.*\]', text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+    except Exception as e:
+        print(f"[WARN] location extraction failed: {e}")
+    return []
 
 # ========== 画像生成 ==========
 
@@ -409,9 +496,22 @@ def main():
         f.write(html)
     print(f"[OK] HTML saved: {html_path}")
 
-    # 4. サマリー生成・context更新
+    # 4. サマリー生成・新キャラ抽出・context更新
     print("[*] Generating summary...")
     summary = generate_summary(api_key, story_text, episode_num)
+
+    existing_chars = [c["name"] for c in context.get("key_characters", [])]
+    new_chars = extract_new_characters(api_key, story_text, episode_num, existing_chars)
+    if new_chars:
+        context.setdefault("key_characters", []).extend(new_chars)
+        print(f"[OK] new chars: {[c['name'] for c in new_chars]}")
+
+    existing_locs = [l["name"] for l in context.get("key_locations", [])]
+    new_locs = extract_new_locations(api_key, story_text, episode_num, existing_locs)
+    if new_locs:
+        context.setdefault("key_locations", []).extend(new_locs)
+        print(f"[OK] new locations: {[l['name'] for l in new_locs]}")
+
     context["last_episode"] = episode_num
     context["last_episode_summary"] = summary
     save_json(CONTEXT_FILE, context)
