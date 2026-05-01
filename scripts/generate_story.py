@@ -54,28 +54,54 @@ HTML_TEMPLATE = """\
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第{episode_num}話 | ピンク髪の魔法使い</title>
+    <title>第{episode_num}話 ─ ピンク髪の魔法使い</title>
+    <meta name="description" content="ピンク髪の魔法使いロゼリアの物語、第{episode_num}話。">
+    <meta property="og:title" content="第{episode_num}話 ─ ピンク髪の魔法使い">
+    <meta property="og:description" content="ピンク髪の魔法使いロゼリアの物語、第{episode_num}話。">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://k6529y.github.io/story-pink-wizard/stories/images/{episode_num:03d}.jpg">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../css/story.css">
 </head>
 <body>
 
+<div class="reading-progress" id="readingProgress"></div>
+
 <header class="site-header">
     <div class="brand">
-        <a href="../index.html" class="title">ピンク髪の<span class="accent">魔法使い</span></a>
-        <span class="ep-num">EP. {episode_num:03d}</span>
+        <a href="../index.html" class="brand-link">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="22" height="22">
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.7"/>
+                    <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="0.4" stroke-dasharray="1 1" opacity="0.6"/>
+                    <path d="M16 9.5 L17.5 14 L22 14.3 L18.5 17 L19.6 21.5 L16 19 L12.4 21.5 L13.5 17 L10 14.3 L14.5 14 Z" fill="currentColor"/>
+                </svg>
+            </span>
+            <span class="brand-text">ピンク髪の<span class="accent">魔法使い</span></span>
+        </a>
+        <span class="ep-num">第 {episode_num} 話</span>
     </div>
 </header>
 
-{image_block}
+{chapter_banner}{image_block}
 <article class="episode-body fade-in">
     <div class="episode-meta">
-        <div class="ep-label">EPISODE {episode_num:03d}</div>
-        <h1>第{episode_num}話</h1>
+        <div class="ep-label">第 {episode_num} 話</div>
+        <h1>{episode_title}</h1>
+        <div class="subtitle">{episode_subtitle}</div>
     </div>
     <div class="story-content">
 {story_body}
     </div>
 </article>
+
+<div class="share-bar">
+    <span class="label">この話を共有</span>
+    <a href="https://twitter.com/intent/tweet?text={share_text}&url={share_url}" target="_blank" rel="noopener">𝕏 でポスト</a>
+    <a href="javascript:navigator.clipboard.writeText('{share_url}').then(()=>this.textContent='✓ コピー済み');">🔗 リンクをコピー</a>
+</div>
 
 <nav class="episode-nav">
 {prev_nav}
@@ -83,13 +109,17 @@ HTML_TEMPLATE = """\
 </nav>
 
 <footer class="site-footer">
-    <p>ピンク髪の魔法使い · Pink-Haired Wizard</p>
-    <p>Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
+    <p>ピンク髪の魔法使い ─ Pink-Haired Wizard</p>
+    <p>毎日 廿二時 更新 ─ Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
 </footer>
 
+<script src="../scripts/story.js"></script>
 </body>
 </html>
 """
+
+KANJI_CHAPTERS = ['第一章', '第二章', '第三章', '第四章', '第五章',
+                  '第六章', '第七章', '第八章', '第九章', '第十章']
 
 # ========== ユーティリティ ==========
 
@@ -240,7 +270,36 @@ def md_to_html_body(md_text):
     flush()
     return '\n'.join(parts)
 
-def build_html(story_text, episode_num, total_episodes, has_image):
+def get_chapter_info(config, episode_num):
+    """story_config.json から章情報を取得"""
+    for idx, arc in enumerate(config.get("story_arcs", [])):
+        ep_range = arc.get("episodes", [0, 0])
+        if ep_range[0] <= episode_num <= ep_range[1]:
+            title = arc.get("title", "")
+            clean = re.sub(r'^第[一二三四五六七八九十0-9]+章[：:]\s*', '', title)
+            return {
+                "kanji_num": KANJI_CHAPTERS[idx] if idx < len(KANJI_CHAPTERS) else f"第{idx+1}章",
+                "name": clean,
+                "episodes": ep_range,
+                "is_first": episode_num == ep_range[0],
+            }
+    return None
+
+
+def make_chapter_banner(config, episode_num):
+    info = get_chapter_info(config, episode_num)
+    if not info or not info["is_first"]:
+        return ""
+    return (
+        f'<section class="chapter-banner fade-in">\n'
+        f'    <div class="ornament">✦ ✦ ✦</div>\n'
+        f'    <div class="chap-num">{info["kanji_num"]}</div>\n'
+        f'    <div class="chap-name">{info["name"]}</div>\n'
+        f'</section>\n'
+    )
+
+
+def build_html(story_text, episode_num, total_episodes, has_image, config=None):
     body = md_to_html_body(story_text)
 
     if has_image:
@@ -249,25 +308,38 @@ def build_html(story_text, episode_num, total_episodes, has_image):
             f'    <div class="frame">\n'
             f'        <img src="images/{episode_num:03d}.jpg" alt="第{episode_num}話のシーン">\n'
             f'    </div>\n'
-            f'    <p class="image-credit">SCENE ILLUSTRATION · POLLINATIONS.AI / FLUX</p>\n'
+            f'    <p class="image-credit">挿絵 ─ Pollinations.ai / FLUX</p>\n'
             f'</section>\n'
         )
     else:
         image_block = ''
 
-    prev_nav = (f'    <a href="{episode_num-1:03d}.html" class="prev">&larr; 第{episode_num-1}話</a>'
+    chapter_banner = make_chapter_banner(config, episode_num) if config else ''
+    chap = get_chapter_info(config, episode_num) if config else None
+    episode_title = f"第{episode_num}話"
+    episode_subtitle = chap["name"] if chap else ""
+
+    prev_nav = (f'    <a href="{episode_num-1:03d}.html" class="prev">← 第{episode_num-1}話</a>'
                 if episode_num > 1 else
-                '    <a href="../index.html" class="prev">&larr; 目次に戻る</a>')
-    next_nav = (f'    <a href="{episode_num+1:03d}.html" class="next">第{episode_num+1}話 &rarr;</a>'
+                '    <a href="../index.html" class="prev">← 目次に戻る</a>')
+    next_nav = (f'    <a href="{episode_num+1:03d}.html" class="next">第{episode_num+1}話 →</a>'
                 if episode_num < total_episodes else
                 '    <span class="disabled">最新話</span>')
 
+    share_url = f"https://k6529y.github.io/story-pink-wizard/stories/{episode_num:03d}.html"
+    share_text = urllib.parse.quote(f"第{episode_num}話 ─ ピンク髪の魔法使い")
+
     return HTML_TEMPLATE.format(
         episode_num=episode_num,
+        episode_title=episode_title,
+        episode_subtitle=episode_subtitle,
         image_block=image_block,
+        chapter_banner=chapter_banner,
         story_body=body,
         prev_nav=prev_nav,
         next_nav=next_nav,
+        share_text=share_text,
+        share_url=share_url,
     )
 
 # ========== index.json更新 ==========
@@ -329,7 +401,7 @@ def main():
     # 3. HTML変換・保存
     os.makedirs(STORIES_DIR, exist_ok=True)
     total = update_index(episode_num, today, has_image)
-    html = build_html(story_text, episode_num, total, has_image)
+    html = build_html(story_text, episode_num, total, has_image, config=config)
     html_path = os.path.join(STORIES_DIR, f"{episode_num:03d}.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)

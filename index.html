@@ -3,88 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ピンク髪の魔法使い | 全100話連載</title>
+    <title>ピンク髪の魔法使い ─ 全百話連載</title>
     <meta name="description" content="ピンク髪の魔法使いロゼリアが秘められた力を目覚めさせるファンタジー小説。毎日22時更新、全100話連載中。">
+
+    <!-- OGP -->
+    <meta property="og:title" content="ピンク髪の魔法使い">
+    <meta property="og:description" content="腕に刻まれた制御不能な刻印——ロゼリアは旅立つ。魔法学園アルカナムへ。毎日22時更新の全100話連載。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://k6529y.github.io/story-pink-wizard/">
+    <meta property="og:image" content="https://k6529y.github.io/story-pink-wizard/stories/images/001.jpg">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header class="site-header">
     <div class="brand">
-        <h1>ピンク髪の<span class="accent">魔法使い</span></h1>
-        <span class="meta">毎日 22:00 更新 / 全100話</span>
+        <a href="#" class="brand-link">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="28" height="28">
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.7"/>
+                    <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="0.4" stroke-dasharray="1 1" opacity="0.6"/>
+                    <path d="M16 9.5 L17.5 14 L22 14.3 L18.5 17 L19.6 21.5 L16 19 L12.4 21.5 L13.5 17 L10 14.3 L14.5 14 Z" fill="currentColor"/>
+                </svg>
+            </span>
+            <span class="brand-text">ピンク髪の<span class="accent">魔法使い</span></span>
+        </a>
+        <nav class="nav-links">
+            <a href="#latest">新着</a>
+            <a href="#episodes">目次</a>
+            <a href="#about">本作について</a>
+        </nav>
     </div>
 </header>
 
 <main>
-    <!-- ======= ヒーローセクション ======= -->
+    <!-- ======= ヒーロー ======= -->
     <section class="hero" id="hero">
         <div class="hero-bg" id="hero-bg"></div>
         <div class="hero-overlay"></div>
         <div class="hero-content fade-in">
-            <span class="hero-tag">Fantasy Novel · 100 Episodes</span>
-            <h2>ピンク髪の少女は、<br>夜明け前に<span class="em">村を発つ</span>。</h2>
-            <p>
-                腕に刻まれた制御不能な刻印。<br>
-                叔母の諦念と慈愛が溶け合った横顔。<br>
-                ロゼリアは旅立つ——魔法学園アルカナムへ。
+            <div class="hero-sigil" aria-hidden="true">
+                <object data="images/sigil.svg" type="image/svg+xml" style="color: var(--accent); width: 80px; height: 80px; opacity: 0.85;"></object>
+            </div>
+            <h2>夜明け前、<br>少女は<span class="em">村を発つ</span>。</h2>
+            <p class="hero-lead">
+                腕に刻まれた、制御不能な紋様。<br>
+                諦念と慈愛が溶け合った叔母の横顔。<br>
+                ロゼリアは魔法学園アルカナムへ——
             </p>
-            <a href="#latest" class="btn-primary" id="hero-cta">最新話を読む</a>
+            <a href="#latest" class="btn-primary" id="hero-cta">
+                <span>新着の話を読む</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M13 5l7 7-7 7"/>
+                </svg>
+            </a>
         </div>
     </section>
 
     <!-- ======= 最新話 ======= -->
     <section class="container" id="latest">
-        <div class="section-sub">— Latest Episode</div>
-        <h2 class="section-title">最新話</h2>
+        <div class="section-head">
+            <span class="section-kicker">新着</span>
+            <h2 class="section-title">最新の一話</h2>
+        </div>
         <div id="latest-story">
-            <div class="loading">読み込み中...</div>
+            <div class="loading">読み込み中</div>
         </div>
     </section>
 
-    <!-- ======= エピソード一覧 ======= -->
+    <!-- ======= 目次 ======= -->
     <section class="container" id="episodes">
-        <div class="section-sub">— All Episodes</div>
-        <h2 class="section-title">全話一覧</h2>
-        <div id="episodes-list" class="episodes-grid">
-            <div class="loading">読み込み中...</div>
+        <div class="section-head">
+            <span class="section-kicker">目次</span>
+            <h2 class="section-title">全百話 ─ 章別</h2>
+        </div>
+        <div id="episodes-list">
+            <div class="loading">読み込み中</div>
         </div>
     </section>
 
-    <!-- ======= 制作情報 ======= -->
+    <!-- ======= 本作について ======= -->
     <section class="container" id="about">
-        <div class="section-sub">— About this Project</div>
-        <h2 class="section-title">物語について</h2>
-        <p style="font-family: var(--serif); color: var(--text-sub); line-height: 2.2; margin-bottom: 2.5rem; max-width: 720px;">
-            『無職転生』『魔術師クノン』『魔女と傭兵』『崩壊世界の魔法杖職人』のような、
-            キャラクターの成長と世界観の重厚さを兼ね備えた異世界ファンタジー。
-            ピンク髪の魔法使いロゼリアが秘められた力に目覚めながら、広大な魔法世界で冒険を繰り広げる。
+        <div class="section-head">
+            <span class="section-kicker">本作について</span>
+            <h2 class="section-title">物語と制作</h2>
+        </div>
+        <p class="about-text">
+            『無職転生』『魔術師クノン』『魔女と傭兵』『崩壊世界の魔法杖職人』
+            に連なる、キャラクターの成長と世界観の重厚さを併せ持つ異世界ファンタジー。
+            ピンク髪の魔法使いロゼリアが秘められた力に目覚めながら、
+            広大な魔法世界で冒険を繰り広げる、毎夜更新の連載小説です。
         </p>
 
         <div class="info-grid">
             <div class="info-card">
                 <div class="label">執筆</div>
-                <div class="value">Claude (Anthropic)</div>
+                <div class="value">Claude</div>
+                <div class="hint">Anthropic</div>
             </div>
             <div class="info-card">
                 <div class="label">挿絵</div>
-                <div class="value">Pollinations.ai / FLUX</div>
+                <div class="value">FLUX</div>
+                <div class="hint">Pollinations.ai</div>
             </div>
             <div class="info-card">
                 <div class="label">話数</div>
-                <div class="value">全100話</div>
+                <div class="value">全百話</div>
+                <div class="hint">約四ヶ月</div>
             </div>
             <div class="info-card">
                 <div class="label">更新</div>
-                <div class="value">毎日 22:00</div>
+                <div class="value">毎夜廿二時</div>
+                <div class="hint">JST</div>
             </div>
         </div>
     </section>
 </main>
 
 <footer class="site-footer">
-    <p>Pink-Haired Wizard / 2026</p>
-    <p>Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <span class="footer-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="20" height="20">
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+                    <path d="M16 9.5 L17.5 14 L22 14.3 L18.5 17 L19.6 21.5 L16 19 L12.4 21.5 L13.5 17 L10 14.3 L14.5 14 Z" fill="currentColor" opacity="0.8"/>
+                </svg>
+            </span>
+            <span>ピンク髪の魔法使い</span>
+        </div>
+        <nav class="footer-nav">
+            <a href="#latest">新着</a>
+            <a href="#episodes">目次</a>
+            <a href="#about">本作について</a>
+        </nav>
+        <p class="footer-copy">
+            &copy; 2026 Pink-Haired Wizard ─
+            Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages
+        </p>
+    </div>
 </footer>
 
 <script src="scripts/nav.js"></script>

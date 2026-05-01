@@ -1,6 +1,5 @@
 /* ==========================================
-   ピンク髪の魔法使い - 個別話ページ
-   テーマ: 読書体験重視・文学的
+   ピンク髪の魔法使い ─ 個別話ページ
    ========================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500&display=swap');
@@ -12,10 +11,12 @@
     --paper-text:  #2a1c25;
     --paper-sub:   #6b5d65;
     --paper-rule:  #d8c8b0;
+    --paper-warm:  #e8d8b8;
     --border:      #2d2040;
     --accent:      #ff7eb6;
     --accent-deep: #d65c95;
     --gold:        #b8945a;
+    --gold-soft:   #c4a572;
     --serif:       'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
     --sans:        'Noto Sans JP', system-ui, sans-serif;
 }
@@ -26,24 +27,40 @@ body {
     font-family: var(--sans);
     background: var(--bg-base);
     background-image:
-        radial-gradient(ellipse at top right, rgba(214, 92, 149, 0.12), transparent 50%),
-        radial-gradient(ellipse at bottom left, rgba(120, 80, 180, 0.10), transparent 50%);
+        radial-gradient(ellipse at top right, rgba(214, 92, 149, 0.10), transparent 55%),
+        radial-gradient(ellipse at bottom left, rgba(120, 80, 180, 0.08), transparent 55%);
     background-attachment: fixed;
     color: #e8dde8;
     line-height: 1.8;
     min-height: 100vh;
 }
 
-/* =========== ヘッダー =========== */
+/* ============ 読書進捗バー ============ */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--gold-soft));
+    z-index: 200;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+/* ============ ヘッダー (隠れる) ============ */
 .site-header {
-    padding: 1.2rem 2rem;
+    padding: 1rem 1.6rem;
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(10px);
-    background: rgba(13, 8, 21, 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(13, 8, 21, 0.78);
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: transform 0.4s ease;
 }
+.site-header.hidden { transform: translateY(-100%); }
 
 .site-header .brand {
     display: flex;
@@ -51,28 +68,40 @@ body {
     justify-content: space-between;
     max-width: 900px;
     margin: 0 auto;
+    gap: 1rem;
 }
 
-.site-header a.title {
-    font-family: var(--serif);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #f4ebf6;
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     text-decoration: none;
-    letter-spacing: 0.08em;
+    color: #f4ebf6;
 }
-.site-header a.title:hover { color: var(--accent); }
+.brand-mark {
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    transition: transform 0.6s ease;
+}
+.brand-link:hover .brand-mark { transform: rotate(45deg); }
 
-.site-header a.title .accent { color: var(--accent); }
+.brand-text {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+.brand-text .accent { color: var(--accent); }
 
-.site-header .ep-num {
+.ep-num {
     font-family: var(--serif);
     color: #a89cb0;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 0.2em;
 }
 
-/* =========== ヒーロー画像 =========== */
+/* ============ ヒーロー画像 ============ */
 .episode-hero {
     max-width: 1100px;
     margin: 2.5rem auto 0;
@@ -85,7 +114,7 @@ body {
     overflow: hidden;
     aspect-ratio: 16 / 9;
     background: var(--bg-surface);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
 }
 
 .episode-hero img {
@@ -100,18 +129,47 @@ body {
     font-size: 0.7rem;
     color: #7a6f88;
     margin-top: 0.5rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
+    font-family: var(--serif);
 }
 
-/* =========== 本文 =========== */
+/* ============ 章扉（章名表示） ============ */
+.chapter-banner {
+    text-align: center;
+    margin: 3rem auto 1rem;
+    padding: 0 2rem;
+}
+.chapter-banner .ornament {
+    color: var(--accent);
+    font-size: 1.2rem;
+    letter-spacing: 1.2em;
+    margin-bottom: 0.6rem;
+    opacity: 0.8;
+}
+.chapter-banner .chap-num {
+    font-family: var(--serif);
+    color: var(--accent);
+    font-size: 0.85rem;
+    letter-spacing: 0.4em;
+    margin-bottom: 0.4rem;
+}
+.chapter-banner .chap-name {
+    font-family: var(--serif);
+    color: #f4ebf6;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+}
+
+/* ============ 本文 ============ */
 .episode-body {
     max-width: 720px;
-    margin: 3rem auto;
-    padding: 4rem 3rem;
+    margin: 2.5rem auto;
+    padding: 4rem 3.2rem;
     background: var(--bg-paper);
     color: var(--paper-text);
     border-radius: 8px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
     position: relative;
 }
 
@@ -119,45 +177,73 @@ body {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, var(--accent), var(--gold));
+    height: 5px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 50%, var(--accent-deep) 100%);
     border-radius: 8px 8px 0 0;
 }
+
+/* 紙の質感装飾 */
+.episode-body::after {
+    content: "";
+    position: absolute;
+    top: 5px; left: 0; right: 0; bottom: 0;
+    background-image:
+        radial-gradient(ellipse at top right, rgba(184, 148, 90, 0.06), transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(214, 92, 149, 0.04), transparent 50%);
+    pointer-events: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.episode-body > * { position: relative; z-index: 1; }
 
 .episode-meta {
     text-align: center;
     margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
+    padding-bottom: 2.2rem;
     border-bottom: 1px solid var(--paper-rule);
+    position: relative;
+}
+
+.episode-meta::after {
+    content: "✦";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-paper);
+    color: var(--gold);
+    padding: 0 0.8rem;
+    font-size: 0.9rem;
 }
 
 .episode-meta .ep-label {
     font-family: var(--serif);
     color: var(--accent-deep);
-    font-size: 0.85rem;
-    letter-spacing: 0.3em;
+    font-size: 0.8rem;
+    letter-spacing: 0.4em;
     margin-bottom: 0.6rem;
 }
 
 .episode-meta h1 {
     font-family: var(--serif);
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 700;
     color: var(--paper-text);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
-.episode-meta .date {
+.episode-meta .subtitle {
     color: var(--paper-sub);
-    font-size: 0.8rem;
+    font-family: var(--serif);
+    font-size: 0.95rem;
     margin-top: 0.6rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
 }
 
 .story-content {
     font-family: var(--serif);
     font-size: 1.05rem;
-    line-height: 2.2;
+    line-height: 2.25;
     color: var(--paper-text);
 }
 
@@ -167,12 +253,12 @@ body {
 }
 
 .story-content p:first-of-type::first-letter {
-    font-size: 2.2em;
+    font-size: 2.4em;
     font-weight: 700;
     color: var(--accent-deep);
     line-height: 1;
     float: left;
-    margin: 0.05em 0.1em 0 0;
+    margin: 0.05em 0.12em 0 0;
     font-family: var(--serif);
 }
 
@@ -186,20 +272,58 @@ body {
     border: none;
     text-align: center;
     margin: 3rem 0;
-    height: 20px;
+    height: 22px;
+    position: relative;
 }
 
 .story-content hr::before {
     content: "✦   ✦   ✦";
     color: var(--gold);
-    letter-spacing: 1em;
-    font-size: 0.9rem;
+    letter-spacing: 1.2em;
+    font-size: 0.85rem;
+    opacity: 0.7;
 }
 
-/* =========== ナビゲーション =========== */
+/* ============ 共有ボタン ============ */
+.share-bar {
+    max-width: 720px;
+    margin: 2rem auto 0;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    color: #a89cb0;
+    font-size: 0.85rem;
+    font-family: var(--serif);
+    letter-spacing: 0.1em;
+}
+
+.share-bar .label {
+    margin-right: 1rem;
+    color: #7a6f88;
+}
+
+.share-bar a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    margin: 0 0.3rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: #d4c8d8;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.25s;
+}
+.share-bar a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ============ ナビゲーション ============ */
 .episode-nav {
     max-width: 720px;
-    margin: 0 auto 4rem;
+    margin: 1rem auto 4rem;
     padding: 0 1rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -207,7 +331,7 @@ body {
 }
 
 .episode-nav a, .episode-nav span {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.4rem;
     background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -222,19 +346,20 @@ body {
 
 .episode-nav a:hover {
     border-color: var(--accent);
-    background: rgba(255, 126, 182, 0.08);
+    background: rgba(255, 126, 182, 0.06);
     color: var(--accent);
 }
 
 .episode-nav .prev { text-align: left; }
 .episode-nav .next { text-align: right; }
 .episode-nav .disabled {
-    opacity: 0.3;
+    opacity: 0.35;
     cursor: not-allowed;
     text-align: right;
+    font-style: italic;
 }
 
-/* =========== フッター =========== */
+/* ============ フッター ============ */
 .site-footer {
     border-top: 1px solid var(--border);
     padding: 2.5rem 2rem;
@@ -242,33 +367,38 @@ body {
     color: #7a6f88;
     font-size: 0.78rem;
     letter-spacing: 0.1em;
+    background: rgba(13, 8, 21, 0.5);
 }
+
+.site-footer p { margin-bottom: 0.4rem; font-family: var(--serif); }
 
 .site-footer a {
     color: #a89cb0;
     text-decoration: none;
 }
-
 .site-footer a:hover { color: var(--accent); }
 
-/* =========== レスポンシブ =========== */
+/* ============ レスポンシブ ============ */
 @media (max-width: 768px) {
-    .site-header { padding: 1rem 1.2rem; }
-    .site-header a.title { font-size: 0.95rem; }
+    .site-header { padding: 0.8rem 1rem; }
+    .brand-text { font-size: 0.95rem; }
+    .ep-num { font-size: 0.72rem; }
     .episode-hero { padding: 0 1rem; margin-top: 1.5rem; }
     .episode-body {
-        padding: 2.5rem 1.5rem;
+        padding: 2.8rem 1.6rem;
         margin: 2rem 1rem;
     }
-    .episode-meta h1 { font-size: 1.5rem; }
-    .story-content { font-size: 1rem; line-height: 2.1; }
+    .episode-meta h1 { font-size: 1.6rem; }
+    .story-content { font-size: 0.98rem; line-height: 2.1; }
     .episode-nav {
-        margin: 0 1rem 3rem;
+        margin: 0.8rem 1rem 3rem;
         grid-template-columns: 1fr;
     }
+    .share-bar { padding: 1.2rem 1rem; }
+    .share-bar .label { display: block; margin: 0 0 0.7rem; }
 }
 
-/* =========== 入場アニメ =========== */
+/* ============ 入場アニメ ============ */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
