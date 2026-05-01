@@ -219,9 +219,10 @@ body {
 .episode-meta .ep-label {
     font-family: var(--serif);
     color: var(--accent-deep);
-    font-size: 0.8rem;
-    letter-spacing: 0.4em;
-    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.35em;
+    margin-bottom: 0.8rem;
+    padding-left: 0.35em;
 }
 
 .episode-meta h1 {
@@ -230,14 +231,6 @@ body {
     font-weight: 700;
     color: var(--paper-text);
     letter-spacing: 0.06em;
-}
-
-.episode-meta .subtitle {
-    color: var(--paper-sub);
-    font-family: var(--serif);
-    font-size: 0.95rem;
-    margin-top: 0.6rem;
-    letter-spacing: 0.15em;
 }
 
 .story-content {

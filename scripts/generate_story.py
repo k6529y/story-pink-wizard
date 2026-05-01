@@ -88,9 +88,8 @@ HTML_TEMPLATE = """\
 {chapter_banner}{image_block}
 <article class="episode-body fade-in">
     <div class="episode-meta">
-        <div class="ep-label">第 {episode_num} 話</div>
+        <div class="ep-label">{episode_chapter_label}</div>
         <h1>{episode_title}</h1>
-        <div class="subtitle">{episode_subtitle}</div>
     </div>
     <div class="story-content">
 {story_body}
@@ -317,7 +316,10 @@ def build_html(story_text, episode_num, total_episodes, has_image, config=None):
     chapter_banner = make_chapter_banner(config, episode_num) if config else ''
     chap = get_chapter_info(config, episode_num) if config else None
     episode_title = f"第{episode_num}話"
-    episode_subtitle = chap["name"] if chap else ""
+    if chap:
+        episode_chapter_label = f'{chap["kanji_num"]} ─ {chap["name"]}'
+    else:
+        episode_chapter_label = ""
 
     prev_nav = (f'    <a href="{episode_num-1:03d}.html" class="prev">← 第{episode_num-1}話</a>'
                 if episode_num > 1 else
@@ -332,7 +334,7 @@ def build_html(story_text, episode_num, total_episodes, has_image, config=None):
     return HTML_TEMPLATE.format(
         episode_num=episode_num,
         episode_title=episode_title,
-        episode_subtitle=episode_subtitle,
+        episode_chapter_label=episode_chapter_label,
         image_block=image_block,
         chapter_banner=chapter_banner,
         story_body=body,
