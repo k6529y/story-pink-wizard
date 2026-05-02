@@ -566,6 +566,10 @@ def main():
     print(f"[*] Episode {episode_num} / {arc['title']}")
     today = datetime.now().strftime("%Y-%m-%d")
 
+    # 編集者役のためにこの時点の context を保存
+    import copy
+    context_before_gen = copy.deepcopy(context)
+
     # 1. ストーリー生成
     print("[*] Generating story...")
     story_text = generate_story(api_key, config, context, episode_num)
@@ -626,7 +630,14 @@ def main():
     save_json(CONTEXT_FILE, context)
     print("[OK] context updated")
 
-    # 5. Discord通知
+    # 5. 編集者役で整合性チェック (重大時のみ通知)
+    try:
+        from story_editor import run_editor
+        run_editor(api_key, episode_num, story_text, context_before_gen)
+    except Exception as e:
+        print(f"[WARN] editor check failed: {e}")
+
+    # 6. Discord通知
     send_discord(
         f"[NEW] 第{episode_num}話 公開！\n"
         f"{arc['title']}\n"
