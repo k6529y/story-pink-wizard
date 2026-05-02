@@ -157,7 +157,7 @@ def get_current_arc(config, episode_num):
 def format_characters(context):
     chars = context.get("key_characters", [])
     if not chars:
-        return "（まだ登場人物は記録されていません）"
+        return "（なし）"
     lines = []
     for c in chars:
         line = f"- {c['name']}（{c.get('role', '')}）"
@@ -172,12 +172,48 @@ def format_locations(context):
         return ""
     return "\n".join([f"- {l['name']}：{l.get('description', '')}" for l in locs])
 
+def format_setting_facts(context):
+    facts = context.get("setting_facts", [])
+    if not facts:
+        return ""
+    return "\n".join([f"- {f['fact']}" for f in facts])
+
+def format_pending_events(context):
+    events = context.get("pending_events", [])
+    if not events:
+        return "（なし）"
+    lines = []
+    for e in events:
+        line = f"- {e['event']}：あと{e.get('remaining_days', '?')}日"
+        if e.get('note'):
+            line += f" ※{e['note']}"
+        lines.append(line)
+    return "\n".join(lines)
+
+def format_current_state(context):
+    state = context.get("current_state")
+    if not state:
+        return ""
+    return (
+        f"- 物語内日数：Day {state.get('in_story_day', '?')}\n"
+        f"- 現在地：{state.get('location', '不明')}\n"
+        f"- ロゼリアの状況：{state.get('roselia_status', '')}\n"
+        f"- 同行者：{state.get('companion', 'なし')}\n"
+        f"- 次話の開始指示：{state.get('next_scene_starts_from', '前話の直後から続ける')}"
+    )
+
 
 def generate_story(api_key, config, context, episode_num):
     arc = get_current_arc(config, episode_num)
     chars_block = format_characters(context)
     locs_block = format_locations(context)
+    facts_block = format_setting_facts(context)
+    state_block = format_current_state(context)
+    events_block = format_pending_events(context)
+
     locs_section = f"\n【既出の地名・組織（必ずこの名称を使用）】\n{locs_block}\n" if locs_block else ""
+    facts_section = f"\n【世界観の固定値（絶対に変えない）】\n{facts_block}\n" if facts_block else ""
+    state_section = f"\n【現在の物語の状態（次話はここから始める）】\n{state_block}\n" if state_block else ""
 
     prompt = f"""あなたは「ピンク髪の魔法使い」というファンタジー小説の執筆者です。
 
@@ -195,7 +231,10 @@ def generate_story(api_key, config, context, episode_num):
 
 【既出の登場人物（必ずこの名前を使用すること。新キャラを出す場合のみ新しい名前を導入）】
 {chars_block}
-{locs_section}
+{locs_section}{facts_section}{state_section}
+【迫っている出来事（日数を絶対に守ること）】
+{events_block}
+
 【現在の章】
 タイトル: {arc["title"]}
 テーマ: {", ".join(arc["themes"])}
@@ -210,7 +249,11 @@ def generate_story(api_key, config, context, episode_num):
 - スタイル: 引き込まれる執筆。キャラの感情・成長を丁寧に描写
 - 内容: 冒険・魔法・日常のバランス。終わり方は「次話への続き」を意識
 - セリフ: 自然で個性的に
-- 重要: 既出キャラの名前・設定は厳守。新キャラを出した場合は名前と特徴を明記
+- 厳守事項：
+  ① 上記【現在の物語の状態】の場面・状況から開始（時間を巻き戻さない）
+  ② 既出キャラ・地名・固定値は絶対に変えない
+  ③ 迫っている出来事の残り日数を正しく扱う
+  ④ 新キャラ・新地名を出した場合は名前と特徴を明記
 
 本文のみ返してください（説明は不要）。"""
 
@@ -286,6 +329,56 @@ def extract_new_locations(api_key, story_text, episode_num, existing_names):
     except Exception as e:
         print(f"[WARN] location extraction failed: {e}")
     return []
+
+
+def update_state_and_events(api_key, story_text, episode_num, prev_state, pending_events, setting_facts):
+    state_str = json.dumps(prev_state, ensure_ascii=False, indent=2) if prev_state else "（初回）"
+    events_str = json.dumps(pending_events, ensure_ascii=False, indent=2) if pending_events else "（なし）"
+    facts_str = "\n".join([f"- {f['fact']}" for f in setting_facts]) if setting_facts else "（なし）"
+
+    prompt = f"""以下のファンタジー小説第{episode_num}話を読み、現在の物語状態を更新してください。
+
+【更新前の状態】
+{state_str}
+
+【迫っている出来事（更新前）】
+{events_str}
+
+【既出の世界観固定値】
+{facts_str}
+
+【話の本文】
+---
+{story_text}
+---
+
+以下のJSONで返してください（JSONのみ・説明文なし）：
+{{
+  "current_state": {{
+    "in_story_day": <整数>,
+    "location": "<話終了時のロゼリアの居場所>",
+    "roselia_status": "<話終了時の状況・心情>",
+    "companion": "<同行者または「なし」>",
+    "next_scene_starts_from": "<次話の開始指示>"
+  }},
+  "updated_pending_events": [
+    {{"event": "...", "due_in_story_day": <整数>, "remaining_days": <整数>, "established_in_episode": <整数>, "note": "..."}}
+  ],
+  "new_setting_facts": [
+    {{"fact": "...", "source_ep": {episode_num}}}
+  ]
+}}
+
+注意：updated_pending_eventsは既存イベントの remaining_days を1日経過なら-1。完了は除外。新規発生は追加。new_setting_factsは本話で新たに明示された数値・距離・期間・ルール等のみ（既出は含めない）。
+"""
+    try:
+        text = call_claude(api_key, prompt, max_tokens=800)
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+    except Exception as e:
+        print(f"[WARN] state update failed: {e}")
+    return None
 
 # ========== 画像生成 ==========
 
@@ -511,6 +604,22 @@ def main():
     if new_locs:
         context.setdefault("key_locations", []).extend(new_locs)
         print(f"[OK] new locations: {[l['name'] for l in new_locs]}")
+
+    print("[*] Updating timeline & state...")
+    state_update = update_state_and_events(
+        api_key, story_text, episode_num,
+        context.get("current_state"),
+        context.get("pending_events", []),
+        context.get("setting_facts", [])
+    )
+    if state_update:
+        if "current_state" in state_update:
+            context["current_state"] = state_update["current_state"]
+        if "updated_pending_events" in state_update:
+            context["pending_events"] = state_update["updated_pending_events"]
+        if state_update.get("new_setting_facts"):
+            context.setdefault("setting_facts", []).extend(state_update["new_setting_facts"])
+            print(f"[OK] {len(state_update['new_setting_facts'])} new facts")
 
     context["last_episode"] = episode_num
     context["last_episode_summary"] = summary
