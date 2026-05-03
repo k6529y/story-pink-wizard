@@ -4,23 +4,24 @@
       "number": 1,
       "file": "001.html",
       "title": "第1話",
-      "published": "2026-04-29"
+      "published": "2026-05-04",
+      "has_image": true
     },
     {
       "number": 2,
       "file": "002.html",
       "title": "第2話",
-      "published": "2026-05-01",
+      "published": "2026-05-04",
       "has_image": true
     },
     {
       "number": 3,
       "file": "003.html",
       "title": "第3話",
-      "published": "2026-05-01",
+      "published": "2026-05-04",
       "has_image": true
     }
   ],
   "total": 3,
-  "last_updated": "2026-05-01"
+  "last_updated": "2026-05-04"
 }
