@@ -630,10 +630,16 @@ def main():
     save_json(CONTEXT_FILE, context)
     print("[OK] context updated")
 
-    # 5. 編集者役で整合性チェック (重大時のみ通知)
+    # 5. 編集者役で整合性チェック → high矛盾は自動修正して上書き保存
     try:
         from story_editor import run_editor
-        run_editor(api_key, episode_num, story_text, context_before_gen)
+        fixed_text = run_editor(api_key, episode_num, story_text, context_before_gen)
+        if fixed_text and fixed_text != story_text:
+            story_path = os.path.join(STORIES_DIR, f"{episode_num:03d}.md")
+            with open(story_path, "w", encoding="utf-8") as f:
+                f.write(fixed_text)
+            story_text = fixed_text
+            print("[OK] Story updated with auto-fixed version")
     except Exception as e:
         print(f"[WARN] editor check failed: {e}")
 

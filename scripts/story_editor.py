@@ -176,20 +176,83 @@ def notify_if_high(episode_num, issues):
         return False
 
 
+def fix_episode(api_key, episode_num, story_text, issues, prev_context):
+    """high severity の矛盾を修正して本文を返す。"""
+    high_issues = [i for i in issues if i.get("severity") == "high"]
+    if not high_issues:
+        return story_text
+
+    issues_text = "\n".join(
+        f"- [{i.get('category','?')}] {i.get('issue','')}"
+        for i in high_issues
+    )
+    facts_block  = _format_facts(prev_context.get("setting_facts", []))
+    chars_block  = _format_chars(prev_context.get("key_characters", []))
+    state_block  = _format_state(prev_context.get("current_state"))
+    events_block = _format_events(prev_context.get("pending_events", []))
+    prev_summary = prev_context.get("last_episode_summary", "（なし）")
+
+    prompt = f"""あなたは「ピンク髪の魔法使い」の執筆者です。
+以下の第{episode_num}話に重大な矛盾が見つかりました。矛盾を修正して本文を書き直してください。
+
+【修正が必要な矛盾】
+{issues_text}
+
+【世界観の固定値（絶対に変えない）】
+{facts_block}
+
+【登場人物（名前・特徴は不変）】
+{chars_block}
+
+【話の冒頭時点の状況】
+{state_block}
+
+【迫っている出来事】
+{events_block}
+
+【前話までのあらすじ】
+{prev_summary}
+
+【現在の第{episode_num}話 本文（これを修正する）】
+{story_text}
+
+矛盾を解消しつつ、文体・キャラ描写は極力維持して本文全体を返す。見出し（# 第{episode_num}話）を含める。説明不要。本文のみ。
+"""
+    fixed = _call_claude(api_key, prompt, max_tokens=4000)
+    if fixed:
+        print(f"[OK] Episode {episode_num} auto-fixed ({len(high_issues)} high issue(s))")
+        return fixed
+    return story_text
+
+
 def run_editor(api_key, episode_num, story_text, prev_context):
+    """チェック→high時は自動修正→ログ→通知。修正後テキストを返す。"""
     print(f"[*] Editor checking episode {episode_num}...")
     issues = check_episode(api_key, episode_num, story_text, prev_context)
     if not issues:
         print("[OK] No issues found")
         log_issues(episode_num, [])
-        return
+        return story_text
     summary = {
         "high":   sum(1 for i in issues if i.get("severity") == "high"),
         "medium": sum(1 for i in issues if i.get("severity") == "medium"),
         "low":    sum(1 for i in issues if i.get("severity") == "low"),
     }
     print(f"[INFO] Issues: high={summary['high']}, medium={summary['medium']}, low={summary['low']}")
-    log_issues(episode_num, issues)
+
+    final_text = story_text
     if summary["high"] > 0:
-        notify_if_high(episode_num, issues)
-        print(f"[ALERT] {summary['high']} HIGH severity issue(s) -> Discord notified")
+        print(f"[*] Auto-fixing {summary['high']} high severity issue(s)...")
+        final_text = fix_episode(api_key, episode_num, story_text, issues, prev_context)
+        issues_after = check_episode(api_key, episode_num, final_text, prev_context)
+        log_issues(episode_num, issues_after)
+        remaining = sum(1 for i in issues_after if i.get("severity") == "high")
+        if remaining > 0:
+            notify_if_high(episode_num, issues_after)
+            print(f"[WARN] {remaining} HIGH issue(s) remain after fix → Discord notified")
+        else:
+            print("[OK] All high issues resolved")
+    else:
+        log_issues(episode_num, issues)
+
+    return final_text
