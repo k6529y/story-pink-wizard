@@ -4,24 +4,52 @@
       "number": 1,
       "file": "001.html",
       "title": "第1話",
-      "published": "2026-05-04",
+      "published": "2026-05-05",
       "has_image": true
     },
     {
       "number": 2,
       "file": "002.html",
       "title": "第2話",
-      "published": "2026-05-04",
+      "published": "2026-05-05",
       "has_image": true
     },
     {
       "number": 3,
       "file": "003.html",
       "title": "第3話",
-      "published": "2026-05-04",
+      "published": "2026-05-05",
+      "has_image": true
+    },
+    {
+      "number": 4,
+      "file": "004.html",
+      "title": "第4話",
+      "published": "2026-05-05",
+      "has_image": true
+    },
+    {
+      "number": 5,
+      "file": "005.html",
+      "title": "第5話",
+      "published": "2026-05-05",
+      "has_image": true
+    },
+    {
+      "number": 6,
+      "file": "006.html",
+      "title": "第6話",
+      "published": "2026-05-05",
+      "has_image": true
+    },
+    {
+      "number": 7,
+      "file": "007.html",
+      "title": "第7話",
+      "published": "2026-05-05",
       "has_image": true
     }
   ],
-  "total": 3,
-  "last_updated": "2026-05-04"
+  "total": 7,
+  "last_updated": "2026-05-05"
 }
