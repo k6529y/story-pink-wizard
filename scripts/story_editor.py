@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ピンク髪の魔法使い ─ 編集者役 (GitHub Actions版・urllibのみ)
+刻まれた魔女 ─ 編集者役 (GitHub Actions版・urllibのみ)
 
 各話生成後に呼ばれ、世界観固定値・既出キャラ・現在状態と
 今回の話文を照合して矛盾を検出する。
@@ -192,7 +192,7 @@ def fix_episode(api_key, episode_num, story_text, issues, prev_context):
     events_block = _format_events(prev_context.get("pending_events", []))
     prev_summary = prev_context.get("last_episode_summary", "（なし）")
 
-    prompt = f"""あなたは「ピンク髪の魔法使い」の執筆者です。
+    prompt = f"""あなたは「刻まれた魔女」の執筆者です。
 以下の第{episode_num}話に重大な矛盾が見つかりました。矛盾を修正して本文を書き直してください。
 
 【修正が必要な矛盾】

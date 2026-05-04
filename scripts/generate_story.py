@@ -54,10 +54,10 @@ HTML_TEMPLATE = """\
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第{episode_num}話 ─ ピンク髪の魔法使い</title>
-    <meta name="description" content="ピンク髪の魔法使いロゼリアの物語、第{episode_num}話。">
-    <meta property="og:title" content="第{episode_num}話 ─ ピンク髪の魔法使い">
-    <meta property="og:description" content="ピンク髪の魔法使いロゼリアの物語、第{episode_num}話。">
+    <title>第{episode_num}話 ─ 刻まれた魔女</title>
+    <meta name="description" content="刻まれた魔女ロゼリアの物語、第{episode_num}話。">
+    <meta property="og:title" content="第{episode_num}話 ─ 刻まれた魔女">
+    <meta property="og:description" content="刻まれた魔女ロゼリアの物語、第{episode_num}話。">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://k6529y.github.io/story-pink-wizard/stories/images/{episode_num:03d}.jpg">
     <meta property="og:locale" content="ja_JP">
@@ -79,7 +79,7 @@ HTML_TEMPLATE = """\
                     <path d="M16 9.5 L17.5 14 L22 14.3 L18.5 17 L19.6 21.5 L16 19 L12.4 21.5 L13.5 17 L10 14.3 L14.5 14 Z" fill="currentColor"/>
                 </svg>
             </span>
-            <span class="brand-text">ピンク髪の<span class="accent">魔法使い</span></span>
+            <span class="brand-text">刻まれた<span class="accent">魔女</span></span>
         </a>
         <span class="ep-num">第 {episode_num} 話</span>
     </div>
@@ -108,7 +108,7 @@ HTML_TEMPLATE = """\
 </nav>
 
 <footer class="site-footer">
-    <p>ピンク髪の魔法使い ─ Pink-Haired Wizard</p>
+    <p>刻まれた魔女 ─ The Branded Witch</p>
     <p>毎日 廿二時 更新 ─ Powered by <a href="https://claude.com" target="_blank" rel="noopener">Claude</a> + GitHub Pages</p>
 </footer>
 
@@ -215,7 +215,7 @@ def generate_story(api_key, config, context, episode_num):
     facts_section = f"\n【世界観の固定値（絶対に変えない）】\n{facts_block}\n" if facts_block else ""
     state_section = f"\n【現在の物語の状態（次話はここから始める）】\n{state_block}\n" if state_block else ""
 
-    prompt = f"""あなたは「ピンク髪の魔法使い」というファンタジー小説の執筆者です。
+    prompt = f"""あなたは「刻まれた魔女」というファンタジー小説の執筆者です。
 
 【主人公の設定】
 名前: {config["hero"]["name"]}
@@ -509,7 +509,7 @@ def build_html(story_text, episode_num, total_episodes, has_image, config=None):
                 '    <span class="disabled">最新話</span>')
 
     share_url = f"https://k6529y.github.io/story-pink-wizard/stories/{episode_num:03d}.html"
-    share_text = urllib.parse.quote(f"第{episode_num}話 ─ ピンク髪の魔法使い")
+    share_text = urllib.parse.quote(f"第{episode_num}話 ─ 刻まれた魔女")
 
     return HTML_TEMPLATE.format(
         episode_num=episode_num,
