@@ -55,8 +55,15 @@
       "title": "第8話",
       "published": "2026-05-07",
       "has_image": true
+    },
+    {
+      "number": 9,
+      "file": "009.html",
+      "title": "第9話",
+      "published": "2026-05-14",
+      "has_image": true
     }
   ],
-  "total": 8,
-  "last_updated": "2026-05-07"
+  "total": 9,
+  "last_updated": "2026-05-14"
 }
