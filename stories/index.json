@@ -195,8 +195,36 @@
       "title": "第28話",
       "published": "2026-05-27",
       "has_image": true
+    },
+    {
+      "number": 29,
+      "file": "029.html",
+      "title": "第29話",
+      "published": "2026-06-11",
+      "has_image": false
+    },
+    {
+      "number": 30,
+      "file": "030.html",
+      "title": "第30話",
+      "published": "2026-06-11",
+      "has_image": false
+    },
+    {
+      "number": 31,
+      "file": "031.html",
+      "title": "第31話",
+      "published": "2026-06-11",
+      "has_image": false
+    },
+    {
+      "number": 32,
+      "file": "032.html",
+      "title": "第32話",
+      "published": "2026-06-11",
+      "has_image": false
     }
   ],
-  "total": 28,
-  "last_updated": "2026-06-09"
+  "total": 32,
+  "last_updated": "2026-06-11"
 }
